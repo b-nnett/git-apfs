@@ -1,74 +1,90 @@
-[![Build status](https://github.com/git/git/workflows/CI/badge.svg)](https://github.com/git/git/actions?query=branch%3Amaster+event%3Apush)
+# Git APFS
 
-Git - fast, scalable, distributed revision control system
-=========================================================
+**Agents Prioritized, Files Shared.**
 
-Git is a fast, scalable, distributed revision control system with an
-unusually rich command set that provides both high-level operations
-and full access to internals.
+A real Git fork for agent workspaces on macOS APFS. Verified copy-on-write
+checkout lives inside Git's C checkout engine, so `switch`, `restore` and
+`worktree add` can share file extents with another registered worktree.
+The executable is `git`: there is no command wrapper or compaction pass.
 
-Git is an Open Source project covered by the GNU General Public
-License version 2 (some parts of it are under different licenses,
-compatible with the GPLv2). It was originally written by Linus
-Torvalds with help of a group of hackers around the net.
+This is an experimental fork based on Git v2.50.1, not a current-upstream
+production release. Other commands remain Git's built-ins; they are not all
+optimized by this patch. Git's GPL v2 license, attribution and history are retained.
 
-Please read the file [INSTALL][] for installation instructions.
+## Build
 
-Many Git online resources are accessible from <https://git-scm.com/>
-including full documentation and Git related tools.
+Requires macOS developer tools and make. Install into your own prefix:
 
-See [Documentation/gittutorial.adoc][] to get started, then see
-[Documentation/giteveryday.adoc][] for a useful minimum set of commands, and
-`Documentation/git-<commandname>.adoc` for documentation of each command.
-If git has been correctly installed, then the tutorial can also be
-read with `man gittutorial` or `git help tutorial`, and the
-documentation of each command with `man git-<commandname>` or `git help
-<commandname>`.
+```sh
+make -j4 NO_GETTEXT=YesPlease NO_TCLTK=YesPlease prefix="$HOME/.local/git-apfs" install
+export PATH="$HOME/.local/git-apfs/bin:$PATH"
+git --version
+git switch branch-name
+git restore -- path/to/file
+```
 
-CVS users may also want to read [Documentation/gitcvs-migration.adoc][]
-(`man gitcvs-migration` or `git help cvs-migration` if git is
-installed).
+Choose a prefix separate from system Git. Omitting gettext and Tcl/Tk matches
+the benchmark build; CLI remote helpers remain included. On other operating
+systems the APFS helper falls back to native Git behavior.
 
-The user discussion and development of Git take place on the Git
-mailing list -- everyone is welcome to post bug reports, feature
-requests, comments and patches to git@vger.kernel.org (read
-[Documentation/SubmittingPatches][] for instructions on patch submission
-and [Documentation/CodingGuidelines][]).
+## How it works
 
-Those wishing to help with error message, usage and informational message
-string translations (localization l10) should see [po/README.md][]
-(a `po` file is a Portable Object file that holds the translations).
+- Finds the same path in another registered worktree and verifies its Git blob
+  identity. Small files use Git's canonical blob hash with SHA-1/SHA-256 and
+  replacement-object support; larger files use a literal byte comparison.
+  Donor HEAD/index metadata is not trusted.
+- Uses no-follow directory opens and pinned file descriptors, checks source
+  metadata around verification/cloning, and publishes a private clone with an
+  exclusive rename. Git retains dirty-file protection, index/ref updates and hooks.
+- Overlaps main-thread object lookup with bounded filesystem/hash workers.
+  Object-store access, configuration, index updates and trace counters stay on
+  the main thread. Each worker owns its directory cache and hash context. The donor-directory handle can be reused; target ancestors are walked
+  afresh. Batch capacity adapts to the descriptor limit and is capped at 256 files.
+- Defaults to up to eight workers for eligible batches of at least 100 entries
+  when a registered donor exists on the same APFS volume. Explicit
+  `checkout.workers` and `checkout.thresholdForParallelism` settings win.
+- Uses ordinary Git writes for filters, text/encoding conversions, symlinks,
+  special metadata, files over 64 MiB, unavailable donors and clone failures
+  before publication. Errors after publication are reported without retrying.
 
-To subscribe to the list, send an email to <git+subscribe@vger.kernel.org>
-(see https://subspace.kernel.org/subscribing.html for details). The mailing
-list archives are available at <https://lore.kernel.org/git/>,
-<https://marc.info/?l=git> and other archival sites.
+No index formats, object formats, trust flags or global settings are changed.
+There is no persistent donor cache, and no space benefit without an eligible
+registered donor. Normal Git locks and the usual requirement to avoid concurrent
+external filesystem writers still apply.
 
-Issues which are security relevant should be disclosed privately to
-the Git Security mailing list <git-security@googlegroups.com>.
+```sh
+GIT_APFS_TRACE=1 git restore -- file  # actual clone counts, logical byte counts
+GIT_APFS_CLONE_CHECKOUT=0 git restore -- file  # native-write control
+# Repository configuration also works:
+git config apfs.cloneCheckout false
+```
 
-The maintainer frequently sends the "What's cooking" reports that
-list the current status of various development topics to the mailing
-list.  The discussion following them give a good reference for
-project status, development direction and remaining tasks.
+Trace byte counts are logical contents, not physical savings. Physical space
+must be measured independently on an isolated APFS container.
 
-The name "git" was given by Linus Torvalds when he wrote the very
-first version. He described the tool as "the stupid content tracker"
-and the name as (depending on your mood):
+## Benchmarks and tests
 
- - random three-letter combination that is pronounceable, and not
-   actually used by any common UNIX command.  The fact that it is a
-   mispronunciation of "get" may or may not be relevant.
- - stupid. contemptible and despicable. simple. Take your pick from the
-   dictionary of slang.
- - "global information tracker": you're in a good mood, and it actually
-   works for you. Angels sing, and a light suddenly fills the room.
- - "goddamn idiotic truckload of sh*t": when it breaks
+[Measured results and limitations](contrib/apfs/results.md) report both latency
+and retained physical allocation, including first status and Git metadata.
+[Implementation details](contrib/apfs/native/README.md) describe the bounded fast
+path and controls. Benchmark scripts and targeted differential tests are in
+`contrib/apfs/`.
 
-[INSTALL]: INSTALL
-[Documentation/gittutorial.adoc]: Documentation/gittutorial.adoc
-[Documentation/giteveryday.adoc]: Documentation/giteveryday.adoc
-[Documentation/gitcvs-migration.adoc]: Documentation/gitcvs-migration.adoc
-[Documentation/SubmittingPatches]: Documentation/SubmittingPatches
-[Documentation/CodingGuidelines]: Documentation/CodingGuidelines
-[po/README.md]: po/README.md
+For reproducible matched upstream/fork builds and comparisons:
+
+```sh
+python3 contrib/apfs/native/build.py
+python3 contrib/apfs/benchmarks/checkout.py --mode latency --repeats 3
+python3 contrib/apfs/benchmarks/checkout.py --mode storage --repeats 3
+python3 -m unittest discover -s contrib/apfs/tests -v
+```
+
+Storage trials require macOS disk-image tools and use disposable private APFS
+containers. Both variants begin with CoW-shared worktrees to isolate command
+savings from initial worktree creation. Raw timing and allocation samples are
+recorded locally. These are synthetic agent workflows, not a guarantee for every
+repository or workload.
+
+Git's native APFS regressions are in `t/t2090-apfs-checkout.sh`. The full upstream
+suite has not yet been run. See [upstream Git's README](README.upstream.md) for
+Git's general documentation and contribution information.

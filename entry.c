@@ -14,6 +14,7 @@
 #include "progress.h"
 #include "fsmonitor.h"
 #include "entry.h"
+#include "apfs-checkout.h"
 #include "parallel-checkout.h"
 
 static void create_directories(const char *path, int path_len,
@@ -300,6 +301,16 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 	static int scratch_nr_checkouts;
 
 	clone_checkout_metadata(&meta, &state->meta, &ce->oid);
+
+	if (!to_tempfile) {
+		int cloned = apfs_checkout_clone(ce, path, ca, state, &st);
+		if (cloned < 0)
+			return error_errno("unable to finalize APFS checkout of %s", path);
+		if (cloned) {
+			fstat_done = 1;
+			goto finish;
+		}
+	}
 
 	if (ce_mode_s_ifmt == S_IFREG) {
 		struct stream_filter *filter = get_stream_filter_ca(ca, &ce->oid);

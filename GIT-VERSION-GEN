@@ -58,6 +58,10 @@ then
 	fi
 
 	GIT_VERSION=$(expr "$VN" : v*'\(.*\)')
+	case "$GIT_VERSION" in
+	*.apfs.*) ;;
+	*) GIT_VERSION="$GIT_VERSION.apfs.2" ;;
+	esac
 fi
 
 if test -z "$GIT_BUILT_FROM_COMMIT"

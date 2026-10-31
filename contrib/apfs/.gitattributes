@@ -1,0 +1,2 @@
+native/git-apfs.patch -whitespace linguist-generated=true
+results/** linguist-generated=true
