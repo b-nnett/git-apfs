@@ -1,0 +1,69 @@
+name: APFS checkout
+
+on:
+  push:
+    paths:
+      - 'apfs-checkout.*'
+      - 'entry.c'
+      - 'parallel-checkout.c'
+      - 'contrib/apfs/**'
+      - 't/t2090-apfs-checkout.sh'
+      - '.github/workflows/apfs-checkout.yml'
+  pull_request:
+    paths:
+      - 'apfs-checkout.*'
+      - 'entry.c'
+      - 'parallel-checkout.c'
+      - 'contrib/apfs/**'
+      - 't/t2090-apfs-checkout.sh'
+      - '.github/workflows/apfs-checkout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-checkout:
+    runs-on: macos-latest
+    timeout-minutes: 25
+    env:
+      LC_ALL: C
+      LANG: C
+      GIT_TEST_UTF8_LOCALE: en_US.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build matched upstream and APFS Git
+        run: python3 contrib/apfs/native/build.py --jobs 4
+      - name: Verify the benchmark patch matches this checkout
+        shell: bash
+        run: |
+          python3 - <<'PYCODE'
+          import glob,json,os,subprocess
+          from pathlib import Path
+          manifest=json.loads(Path(glob.glob('contrib/apfs/benchmark-results/native-build-*/manifest.json')[0]).read_text())
+          source=Path(manifest['builds'][1]['source'])
+          tracked=subprocess.check_output(['git','ls-files','-z']).split(b'\0')
+          for raw in tracked:
+              if not raw:
+                  continue
+              name=os.fsdecode(raw)
+              if name in ('README.md','README.upstream.md') or name.startswith(('.github/','contrib/apfs/')):
+                  continue
+              current=Path(name)
+              expected=source/name
+              if current.is_dir():
+                  continue
+              if current.is_symlink():
+                  matches=expected.is_symlink() and os.readlink(current)==os.readlink(expected)
+              else:
+                  matches=expected.is_file() and current.read_bytes()==expected.read_bytes()
+              if not matches:
+                  raise SystemExit('Benchmark patch is stale for '+name+'; regenerate it before benchmarking.')
+          PYCODE
+      - name: Differential checkout regressions
+        run: python3 -m unittest discover -s contrib/apfs/tests -v
+      - name: Git checkout, restore, collision and worktree regressions
+        shell: bash
+        run: |
+          source_dir=$(python3 -c 'import glob,json; p=glob.glob("contrib/apfs/benchmark-results/native-build-*/manifest.json")[0]; print(json.load(open(p))["builds"][1]["source"])')
+          GIT_CEILING_DIRECTORIES="$(dirname "$source_dir")" GIT_VERSION=2.50.1.apfs.2 GIT_BUILT_FROM_COMMIT=d82adb61ba2fd11d8f2587fca1b6bd7925ce4044 make -C "$source_dir" -j4 NO_GETTEXT=YesPlease NO_TCLTK=YesPlease prefix="$PWD/contrib/apfs/benchmark-results/git-apfs" test T='t2004-checkout-cache-temp.sh t2005-checkout-index-symlinks.sh t2007-checkout-symlink.sh t2009-checkout-statinfo.sh t2021-checkout-overwrite.sh t2022-checkout-paths.sh t2026-checkout-pathspec-file.sh t2070-restore.sh t2071-restore-patch.sh t2072-restore-pathspec-file.sh t2080-parallel-checkout-basics.sh t2081-parallel-checkout-collisions.sh t2082-parallel-checkout-attributes.sh t2090-apfs-checkout.sh t2400-worktree-add.sh'

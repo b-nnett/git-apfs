@@ -4,6 +4,7 @@
 #include "git-compat-util.h"
 #include "config.h"
 #include "entry.h"
+#include "apfs-checkout.h"
 #include "gettext.h"
 #include "hash.h"
 #include "hex.h"
@@ -39,7 +40,6 @@ enum pc_status parallel_checkout_status(void)
 }
 
 static const int DEFAULT_THRESHOLD_FOR_PARALLELISM = 100;
-static const int DEFAULT_NUM_WORKERS = 1;
 
 void get_parallel_checkout_configs(int *num_workers, int *threshold)
 {
@@ -58,7 +58,7 @@ void get_parallel_checkout_configs(int *num_workers, int *threshold)
 	}
 
 	if (repo_config_get_int(the_repository, "checkout.workers", num_workers))
-		*num_workers = DEFAULT_NUM_WORKERS;
+		*num_workers = apfs_checkout_default_workers();
 	else if (*num_workers < 1)
 		*num_workers = online_cpus();
 
@@ -358,6 +358,19 @@ void write_pc_item(struct parallel_checkout_item *pc_item,
 		goto out;
 	}
 
+	{
+		int cloned = apfs_checkout_clone(pc_item->ce, path.buf, &pc_item->ca, state, &pc_item->st);
+		if (cloned < 0) {
+			error_errno("unable to finalize APFS checkout of %s", path.buf);
+			pc_item->status = PC_ITEM_FAILED;
+			goto out;
+		}
+		if (cloned) {
+			pc_item->status = PC_ITEM_WRITTEN;
+			goto out;
+		}
+	}
+
 	fd = open(path.buf, O_WRONLY | O_CREAT | O_EXCL, mode);
 
 	if (fd < 0) {
@@ -642,7 +655,8 @@ static void write_items_sequentially(struct checkout *state)
 
 	for (i = 0; i < parallel_checkout.nr; i++) {
 		struct parallel_checkout_item *pc_item = &parallel_checkout.items[i];
-		write_pc_item(pc_item, state);
+		if (pc_item->status == PC_ITEM_PENDING)
+			write_pc_item(pc_item, state);
 		if (pc_item->status != PC_ITEM_COLLIDED)
 			advance_progress_meter();
 	}
@@ -664,6 +678,9 @@ int run_parallel_checkout(struct checkout *state, int num_workers, int threshold
 		num_workers = parallel_checkout.nr;
 
 	if (num_workers <= 1 || parallel_checkout.nr < threshold) {
+		write_items_sequentially(state);
+	} else if (apfs_checkout_batch(parallel_checkout.items, parallel_checkout.nr,
+				       state, num_workers)) {
 		write_items_sequentially(state);
 	} else {
 		struct pc_worker *workers = setup_workers(state, num_workers);

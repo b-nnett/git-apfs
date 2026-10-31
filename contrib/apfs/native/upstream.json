@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/git/git.git",
+  "tag": "v2.50.1",
+  "commit": "d82adb61ba2fd11d8f2587fca1b6bd7925ce4044",
+  "version": "2.50.1",
+  "apfs_version": "2.50.1.apfs.2",
+  "make_options": [
+    "NO_GETTEXT=YesPlease",
+    "NO_TCLTK=YesPlease"
+  ],
+  "patch_sha256": "921f765f4d66fe800c85acc8aa41242b5754ecb0a0ba9752f261b8869a879234"
+}
