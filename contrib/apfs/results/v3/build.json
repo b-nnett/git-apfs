@@ -1,0 +1,50 @@
+{
+  "upstream": {
+    "repository": "https://github.com/git/git.git",
+    "tag": "v2.56.0",
+    "commit": "a018953688f1b10bddf91bff8747068f5f4746a4",
+    "version": "2.56.0",
+    "apfs_version": "2.56.0.apfs.3",
+    "make_options": [
+      "NO_RUST=YesPlease",
+      "NO_GETTEXT=YesPlease",
+      "NO_TCLTK=YesPlease"
+    ],
+    "patch_sha256": "ce8a0cfb323e7a6674d570d20347779b4e67e3e385fdfef5bc07ab75019d0ce7"
+  },
+  "platform": "macOS-15.2-arm64-arm-64bit",
+  "builds": [
+    {
+      "variant": "git-baseline",
+      "binary": "${WORKSPACE}/benchmark-results/git-baseline/bin/git",
+      "sha256": "4eaf7f43fd14dc071852f6f7c20aa729708f2adb8afd97d80403aca872dfabec",
+      "source": "${WORKSPACE}/benchmark-results/native-build-31shgo6d/git-baseline",
+      "log": "${WORKSPACE}/benchmark-results/native-build-31shgo6d/git-baseline.log",
+      "command": [
+        "make",
+        "-j8",
+        "NO_RUST=YesPlease",
+        "NO_GETTEXT=YesPlease",
+        "NO_TCLTK=YesPlease",
+        "prefix=${WORKSPACE}/benchmark-results/git-baseline",
+        "install"
+      ]
+    },
+    {
+      "variant": "git-apfs",
+      "binary": "${WORKSPACE}/benchmark-results/git-apfs/bin/git",
+      "sha256": "792cb6ceb40fa6d231a316b1557f86cee6eda74241344bc5d159eafd222c6214",
+      "source": "${WORKSPACE}/benchmark-results/native-build-31shgo6d/git-apfs",
+      "log": "${WORKSPACE}/benchmark-results/native-build-31shgo6d/git-apfs.log",
+      "command": [
+        "make",
+        "-j8",
+        "NO_RUST=YesPlease",
+        "NO_GETTEXT=YesPlease",
+        "NO_TCLTK=YesPlease",
+        "prefix=${WORKSPACE}/benchmark-results/git-apfs",
+        "install"
+      ]
+    }
+  ]
+}

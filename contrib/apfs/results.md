@@ -1,135 +1,105 @@
-# Git APFS: small-file speed and retained space
+# Git APFS v3: agent workflows, speed and physical space
 
-Measured 31 October 2026 on macOS 15.2 / arm64. APFS means **Agents Prioritized,
-Files Shared**. This is a native Git C-source fork, with private verified clones
-inside the checkout engine and no post-command compaction.
+Measured on macOS 15.2 arm64 on 31 October 2026. Matched Git **2.56.0** and **2.56.0.apfs.3**, pinned to upstream `a018953688f1b10bddf91bff8747068f5f4746a4`; both use the same C build options. [Build manifest](results/v3/build.json) records patch and binary hashes. [v2 measurements](results-v2.md) are historical and use a different upstream base.
 
-Small-file commands now run close to native Git on this machine. The interleaved
-comparison is essentially tied; separate fixtures show a 2.6 ms switch penalty
-and a slightly faster restore. These are modest differences, not statistically
-established speedups or a guarantee for every repository.
+The fork adds LF-safe text eligibility, streamed verification for all eligible sizes, donor search hints, adaptive large-file batches, a shared auxiliary-worker budget, JSON diagnostics and a bounded optional donor cache. It also fixes worktree registration publication order. **APFS cloning currently bypasses FSMonitor for normal stat validation**, following missed-edit failures in concurrent stress tests. The final matrix also reproduced missed restores in the equally tuned upstream control at 32 agents, so the symptom is not isolated to our clone/cache code. Untracked-cache tuning remains available. This is a correctness guard, not a completed FSMonitor speed optimization.
 
-## Small-file latency
+## Whole agent workflows
 
-2,000 files × 4 KiB; each agent edits 200 files. Three trial fixtures per operation,
-four measured commands per variant in each fixture. Commands within a fixture
-share the repository and are not independent trials. Medians include the whole
-Git process. First status is measured separately and also reported as a combined
-command-plus-status median.
+The source is the real Git v2.56.0 repository. Each agent creates a worktree, performs two edit/diff/add/commit/restore cycles on 16 actual text files, switches back and is removed. Committed blob identities and restored bytes are checked independently of status. Median wall time includes cleanup but excludes separately listed cache warm-up and allocation checkpoint waits. Three trials attempted per variant/cohort. Failed trials are excluded from timing medians and shown in the valid-trial column.
 
-| Workload | Native command | APFS command | Native command + status | APFS command + status |
+| Variant | Agents | Valid trials | Workflow wall | Cache warm-up | Summed command CPU | Max command RSS |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| native | 1 | 3/3 | 1.224s | 0.000s | 1.19s | 58.6 MiB |
+| native | 8 | 3/3 | 4.602s | 0.000s | 9.47s | 66.8 MiB |
+| native | 32 | 3/3 | 20.032s | 0.000s | 36.26s | 67.2 MiB |
+| apfs | 1 | 3/3 | 1.461s | 0.000s | 2.49s | 18.4 MiB |
+| apfs | 8 | 3/3 | 5.561s | 0.000s | 16.91s | 19.2 MiB |
+| apfs | 32 | 3/3 | 22.079s | 0.000s | 59.19s | 19.3 MiB |
+| native-tuned | 1 | 3/3 | 1.179s | 0.000s | 0.86s | 59.8 MiB |
+| native-tuned | 8 | 3/3 | 4.762s | 0.000s | 8.08s | 67.2 MiB |
+| native-tuned | 32 | 2/3 | 20.785s | 0.000s | 28.67s | 67.7 MiB |
+| apfs-tuned | 1 | 3/3 | 1.265s | 0.000s | 2.32s | 18.5 MiB |
+| apfs-tuned | 8 | 3/3 | 5.558s | 0.000s | 16.36s | 19.0 MiB |
+| apfs-tuned | 32 | 3/3 | 21.777s | 0.000s | 58.24s | 19.5 MiB |
+| apfs-cache | 1 | 3/3 | 1.517s | 1.131s | 3.58s | 19.2 MiB |
+| apfs-cache | 8 | 3/3 | 6.214s | 1.078s | 20.70s | 19.4 MiB |
+| apfs-cache | 32 | 3/3 | 25.203s | 1.131s | 79.50s | 19.7 MiB |
+| apfs-cache-tuned | 1 | 3/3 | 1.339s | 1.112s | 3.38s | 19.2 MiB |
+| apfs-cache-tuned | 8 | 3/3 | 6.344s | 1.123s | 21.02s | 19.5 MiB |
+| apfs-cache-tuned | 32 | 3/3 | 25.018s | 1.104s | 78.98s | 19.7 MiB |
+
+Native/APFS defaults have no FSMonitor tuning. `*-tuned` sets the same FSMonitor/untracked-cache configuration in both builds; the fork reports its FSMonitor stat guard and therefore does not receive that acceleration. Cache variants use a 64 MiB charge limit. Cache warm-up and maintenance command CPU are included in summed CPU; CPU/RSS exclude persistent monitor daemons and are not aggregate peak RAM. Per-command p50/p95 and individual distributions are in the [full latency report](results/v3/agent-latency/summary.md).
+
+## Real-workflow physical allocation
+
+Separate private APFS-container trials, one trial per cell. Extra allocation is relative to the source fixture and includes cache warm-up, Git objects/index/refs and worktree metadata. Peak is a sampled lower bound. Cleanup removes worktrees and stops managed monitor daemons; agent branches and committed objects remain, as do configured cache entries. It does not run garbage collection. These are physical container measurements, not sums of file block counts.
+
+| Variant | Agents | Sampled peak extra | Retained extra | After cleanup extra |
 | --- | ---: | ---: | ---: | ---: |
-| Separate fixtures: switch | 65.45 ms | 68.08 ms | 77.29 ms | 81.45 ms |
-| Separate fixtures: restore | 59.44 ms | 58.22 ms | 74.61 ms | 71.82 ms |
-| Interleaved fixture: switch | 70.42 ms | 70.33 ms | 82.39 ms | 83.55 ms |
-| Interleaved fixture: restore | 61.66 ms | 61.20 ms | 74.26 ms | 74.67 ms |
+| native | 1 | 62.97 MiB | 62.97 MiB | 0.37 MiB |
+| native | 8 | 505.02 MiB | 505.02 MiB | 3.03 MiB |
+| native | 32 | 2024.35 MiB | 2024.35 MiB | 12.05 MiB |
+| apfs | 1 | 2.45 MiB | 2.45 MiB | 0.66 MiB |
+| apfs | 8 | 19.62 MiB | 19.29 MiB | 4.90 MiB |
+| apfs | 32 | 80.59 MiB | 77.09 MiB | 19.00 MiB |
+| native-tuned | 1 | 62.99 MiB | 62.99 MiB | 0.37 MiB |
+| native-tuned | 8 | 505.23 MiB | 505.23 MiB | 3.07 MiB |
+| native-tuned | 32 | 2024.59 MiB | 2024.59 MiB | 12.02 MiB |
+| apfs-tuned | 1 | 2.46 MiB | 2.46 MiB | 0.65 MiB |
+| apfs-tuned | 8 | 19.92 MiB | 19.50 MiB | 4.89 MiB |
+| apfs-tuned | 32 | 79.60 MiB | 77.63 MiB | 19.05 MiB |
+| apfs-cache | 1 | 4.71 MiB | 4.71 MiB | 2.87 MiB |
+| apfs-cache | 8 | 22.93 MiB | 22.93 MiB | 8.43 MiB |
+| apfs-cache | 32 | 83.51 MiB | 81.29 MiB | 23.24 MiB |
+| apfs-cache-tuned | 1 | 4.62 MiB | 4.62 MiB | 2.85 MiB |
+| apfs-cache-tuned | 8 | 23.11 MiB | 22.69 MiB | 8.17 MiB |
+| apfs-cache-tuned | 32 | 83.43 MiB | 80.84 MiB | 22.25 MiB |
 
-Separate fixtures use four worktrees. Interleaved fixtures keep four native and
-four APFS targets live in one repository, with deterministic ordering varied by
-repeat. Both arms start with CoW-shared worktrees, and setup is untimed. The fork's
-default worker policy is measured; neither final comparison overrides workers.
-Automatic Git GC is disabled in both fixtures to exclude background maintenance.
+[Storage method and full measurements](results/v3/agent-storage/summary.md). Cache accounting charges at least 4 KiB per snapshot or allocated file blocks, plus directory/lock metadata. Its quota is conservative rather than a unique physical-byte count. It can retain more space after cleanup than the cache-free mode.
 
-Large-file restore is approximately tied in the separate host-filesystem run:
-native 174.11 ms, APFS 173.93 ms. Large-file switch remains sensitive to run/volume
-state: native 22.03 ms versus APFS 89.90 ms on the host, but native 103.40 ms versus
-APFS 14.40 ms in private-container storage trials. We do not claim a reliable
-large-switch speedup. Storage-trial timing is secondary to the host latency run.
+## Switch and restore
 
-## Physical space
+Paired latency measurements interleave four worktrees of each variant; physical storage uses separate containers with four worktrees each. Each begins with identically shared files and changes approximately 10% of them. Three trials per cell; command medians are across 12 operations.
 
-Median extra physical APFS allocation after the operation across three fresh
-private-container trials. Four live agent worktrees, with approximately 10% of
-files changed independently. Allocation is relative to the original source
-checkout/object-store fixture and includes Git objects, refs, indexes, worktree
-files and filesystem metadata. It is not logical `du` usage.
+| Shape / command | Native | APFS | APFS / native time | Native retained extra | APFS retained extra |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| small / switch | 65.23 ms | 69.77 ms | 1.07× | 13.77 MiB | 10.68 MiB |
+| small / restore | 58.17 ms | 60.82 ms | 1.05× | 6.73 MiB | 3.59 MiB |
+| large / switch | 105.34 ms | 29.67 ms | 0.28× | 96.78 MiB | 48.77 MiB |
+| large / restore | 175.99 ms | 174.28 ms | 0.99× | 48.46 MiB | 0.45 MiB |
 
-| Workload | Native Git | Git APFS | Less allocation |
-| --- | ---: | ---: | ---: |
-| Small switch | 13.82 MiB | 10.64 MiB | 23% |
-| Small restore | 6.72 MiB | 3.60 MiB | 46% |
-| Large switch | 96.77 MiB | 48.77 MiB | 50% |
-| Large restore | 48.46 MiB | 0.45 MiB | 99% |
+[Latency details](results/v3/checkout-latency/summary.md), [physical allocation](results/v3/checkout-storage/summary.md), and [separate settled large-file profiles](results/v3/large-profile/summary.md). The profiled run adds phase timing and Git Trace2 overhead and is not pooled with normal latency. Phase work sums can exceed wall time because workers run concurrently. In the settled profiled APFS restore run, median clone-batch wall time was about 4.1 ms while Trace2 attributed about 164.8 ms of the 175.2 ms command to index writing. The remaining large-restore bottleneck lies outside clone publication; the current fixture exercises conservative Git index validation. The optimization does not remove that cost. Large-switch timings are profile-sensitive: the default paired host run favored APFS by 3.55×, the separately instrumented settled host run by about 1.34×, while storage-mode timings on private disk images favored native Git (34.6 vs 71.2 ms). Storage-mode timings are not normal host-latency measurements, but this variation rules out claiming a universal large-switch speedup.
 
-The large fixture has 128 files × 1 MiB; each of four agents changes 12 files.
-Switch commits agent edits and returns to the shared base. Commit objects remain
-allocated in both variants, explaining the remaining ~49 MiB. Restore discards
-only selected working-tree edits and preserves an unrelated staged file and an
-untracked note. Sharing survives without persistent caches or a compaction pass.
+## Second real repository
 
-All 72 physical checkpoints stabilized, retaining raw samples and requiring three
-equal readings after sync. Private images were detached and removed after trials.
+[microsoft/TypeScript](https://github.com/microsoft/TypeScript) is pinned to `6161772c1370bdd4a82f808e6823bd755eb1870d`. One trial per cell: six variants with one agent, and native/APFS defaults with eight agents. This is a coverage check, not a statistically strong comparison. [One-agent report](results/v3/typescript-latency/summary.md), [eight-agent report](results/v3/typescript-concurrent/summary.md).
 
-## Implementation
+| TypeScript agents | Native workflow | APFS workflow |
+| ---: | ---: | ---: |
+| 1 | 9.048s | 11.097s |
+| 8 | 123.130s | 126.682s |
 
-- Removes redundant per-file donor HEAD/tree lookups. Requested Git blob identity,
-  rather than donor HEAD/index state, determines whether source bytes are usable.
-- Main-thread preflight resolves Git object type/size and replacement-object
-  identity. Small-file filesystem reads and Git blob hashing run in bounded
-  workers with private directory caches and independent hash contexts. Large-file
-  literal byte comparisons remain on the main thread.
-- Git object-store/config/index access and counters remain on the main thread.
-  Batches contain at most 256 files and shrink according to the descriptor limit.
-- Up to eight workers are selected for eligible batches of at least 100 entries
-  only when another registered worktree is available on the same APFS volume.
-  Explicit worker/threshold settings are respected; larger explicit worker counts
-  use Git's existing process workers.
-- Donors use no-follow opens, byte/hash verification and source metadata checks.
-  Targets use fresh no-follow directory walks, a private random sibling clone,
-  exclusive rename, fresh timestamps and actual stat data for Git's index.
-  Unneeded chmod calls are skipped; read hints warm cloned data without writes.
+The cache-enabled TypeScript trial took 29.69s plus 17.22s cache warm-up. With registered donors already available, cache admission/verification adds substantial overhead to this corpus; this is another reason it remains opt-in.
 
-Git retains dirty-file protection, staging, ref/index formats and hooks. Filters,
-encoding/text conversions, symlinks, special file flags/xattrs, prefix/temp-file
-checkout and files over 64 MiB use native writes. There is no persistent blob cache
-or space benefit without a suitable registered donor. Native Git locks and the
-usual requirement to avoid concurrent external filesystem writers still apply.
+## Validation and remaining limits
 
-## Timer correction and provenance
+- 45 local Python tests and 38 packaged tests pass.
+- 742 targeted Git checks pass; three skip for missing prerequisites. This is not the full upstream suite.
+- Six 32-agent guarded stress trials passed before the frozen performance matrix. Earlier registration and missed-edit failures remain archived separately; they are not silently retried into success.
+- No global cache purge; latency measures a warm host filesystem. Command instrumentation and correctness verification add overhead to workflow wall time. CPU values have `/usr/bin/time` reporting precision.
+- Private-container readings must stabilize. Peak sampling waits at least 100 ms between polls and can miss transients. No claim of aggregate daemon/agent peak RAM is made.
+- Donor bytes are always verified. Explicit checkout workers override the shared default budget; caller threads are additional to auxiliary leases.
+- The cache is off by default. Its warm-up, retention, FIFO policy and FSMonitor guard are material costs.
 
-The runner uses blocking `communicate()` with an independent process-group
-watchdog. Python's `communicate(timeout=...)` can introduce polling-wait delays
-after pipe EOF on macOS; a reproduction measured ~12 ms of extra wait. Historical
-research latency reports used that older method and must not be mixed with these
-final measurements. Physical-allocation measurements do not derive from timing.
+| Final report | Passed / attempted |
+| --- | ---: |
+| [agent-latency](results/v3/agent-latency/summary.md) | 53 / 54 |
+| [checkout-latency](results/v3/checkout-latency/summary.md) | 24 / 24 |
+| [large-profile](results/v3/large-profile/summary.md) | 12 / 12 |
+| [agent-storage](results/v3/agent-storage/summary.md) | 18 / 18 |
+| [checkout-storage](results/v3/checkout-storage/summary.md) | 24 / 24 |
+| [typescript-latency](results/v3/typescript-latency/summary.md) | 6 / 6 |
+| [typescript-concurrent](results/v3/typescript-concurrent/summary.md) | 2 / 2 |
 
-These final latency and space reports all use the same two binaries, and their
-hashes match the build manifest. Runner/source hashes are recorded in each raw
-report. All eight patched core/build/test files exactly match the measured build
-sources; there was no post-measurement code cleanup. Workspace paths in published
-artifacts are replaced with `${WORKSPACE}` for portability/privacy.
-
-The baseline is upstream Git v2.50.1, commit
-`d82adb61ba2fd11d8f2587fca1b6bd7925ce4044`; the fork is `2.50.1.apfs.2`.
-Both use the same make/compiler options, omitting gettext/Tcl-Tk while retaining
-CLI remote helpers. This older pin matches the original experiments. This is an
-experimental fork, not a current-upstream production release.
-
-Validation: 32 local Python tests passed, including 20 native-fork regressions;
-25 of those tests are packaged here (native fork, process runner and physical
-measurement). 354 selected upstream Git tests plus eight new native APFS tests
-passed (362 total). All 60 final benchmark comparisons passed: 24 separate latency,
-12 paired small-file latency, and 24 physical-storage comparisons. Every measured
-APFS checkout performed actual clones. The full upstream Git suite has not been
-run locally. A macOS regression workflow is included for the packaged checks.
-
-Coverage includes dirty and same-sized/restored-mtime donors, parallel batches,
-low descriptor limits, explicit serial/disabled controls, SHA-256 repositories,
-replacement objects, partial/source/staged-only restore, staged/untracked
-preservation, modes/umask, symlinks and ancestor-link rejection, filters/hooks,
-binary and unusual filenames, oversized-blob fallback and edit visibility.
-
-## Artifacts and reproduction
-
-- [Separate latency summary](results/latency/summary.md), [raw data](results/latency/results.json)
-- [Paired small-file summary](results/paired/summary.md), [raw data](results/paired/results.json)
-- [Physical storage summary](results/storage/summary.md), [raw data](results/storage/results.json)
-- [Build manifest](results/build.json), [Git test log](results/native-tests.txt), [local Python log](results/local-python-tests.txt)
-- [Build/use and implementation](native/README.md), [benchmark methodology](benchmarks/README.md)
-
-```sh
-python3 contrib/apfs/native/build.py
-python3 contrib/apfs/benchmarks/checkout.py --repeats 3
-python3 contrib/apfs/benchmarks/checkout.py --paired --profiles small --repeats 3
-python3 contrib/apfs/benchmarks/checkout.py --mode storage --repeats 3
-```
+Each report directory includes a compressed raw `results.json.gz`, executable and runner hashes, invocation parameters and a run log. [Run index](results/v3/run-index.json), [local tests](results/v3/local-python-tests.txt), [packaged tests](results/v3/packaged-python-tests.txt), [Git tests](results/v3/native-tests.txt). Absolute workspace/home paths are replaced with placeholders. Exact runner snapshots are archived alongside results.

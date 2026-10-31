@@ -1,0 +1,152 @@
+[
+  {
+    "name": "agent-latency",
+    "command": [
+      "python3",
+      "benchmarks/agents.py",
+      "--source",
+      "references/git-core",
+      "--ref",
+      "v2.56.0",
+      "--agents",
+      "1,8,32",
+      "--repeats",
+      "3",
+      "--assert-clones"
+    ],
+    "exit": 1,
+    "seconds": 673.8246841430664,
+    "log": "/tmp/git-apfs-v3-final-agent-latency.log",
+    "reports": [
+      "${WORKSPACE}/benchmark-results/agents-latency-ow3e2b96"
+    ]
+  },
+  {
+    "name": "checkout-latency",
+    "command": [
+      "python3",
+      "benchmarks/checkout.py",
+      "--mode",
+      "latency",
+      "--paired",
+      "--repeats",
+      "3"
+    ],
+    "exit": 0,
+    "seconds": 90.51665306091309,
+    "log": "/tmp/git-apfs-v3-final-checkout-latency.log",
+    "reports": [
+      "${WORKSPACE}/benchmark-results/checkout-latency-1jjncxqd"
+    ]
+  },
+  {
+    "name": "large-profile",
+    "command": [
+      "python3",
+      "benchmarks/checkout.py",
+      "--profiles",
+      "large",
+      "--mode",
+      "latency",
+      "--paired",
+      "--repeats",
+      "3",
+      "--profile",
+      "--settle-seconds",
+      "1.1"
+    ],
+    "exit": 0,
+    "seconds": 60.72377681732178,
+    "log": "/tmp/git-apfs-v3-final-large-profile.log",
+    "reports": [
+      "${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01"
+    ]
+  },
+  {
+    "name": "agent-storage",
+    "command": [
+      "python3",
+      "benchmarks/agents.py",
+      "--source",
+      "references/git-core",
+      "--ref",
+      "v2.56.0",
+      "--agents",
+      "1,8,32",
+      "--mode",
+      "storage",
+      "--repeats",
+      "1",
+      "--assert-clones"
+    ],
+    "exit": 0,
+    "seconds": 752.407781124115,
+    "log": "/tmp/git-apfs-v3-final-agent-storage.log",
+    "reports": [
+      "${WORKSPACE}/benchmark-results/agents-storage-1u3m4hki"
+    ]
+  },
+  {
+    "name": "checkout-storage",
+    "command": [
+      "python3",
+      "benchmarks/checkout.py",
+      "--mode",
+      "storage",
+      "--repeats",
+      "3"
+    ],
+    "exit": 0,
+    "seconds": 242.97094798088074,
+    "log": "/tmp/git-apfs-v3-final-checkout-storage.log",
+    "reports": [
+      "${WORKSPACE}/benchmark-results/checkout-storage-7fdh3eyh"
+    ]
+  },
+  {
+    "name": "typescript-latency",
+    "command": [
+      "python3",
+      "benchmarks/agents.py",
+      "--source",
+      "references/typescript",
+      "--ref",
+      "6161772c1370bdd4a82f808e6823bd755eb1870d",
+      "--agents",
+      "1",
+      "--repeats",
+      "1",
+      "--assert-clones"
+    ],
+    "exit": 0,
+    "seconds": 273.80758810043335,
+    "log": "/tmp/git-apfs-v3-final-typescript-latency.log",
+    "reports": [
+      "${WORKSPACE}/benchmark-results/agents-latency-aaot4u72"
+    ]
+  },
+  {
+    "name": "typescript-concurrent",
+    "command": [
+      "python3",
+      "benchmarks/agents.py",
+      "--source",
+      "references/typescript",
+      "--ref",
+      "6161772c1370bdd4a82f808e6823bd755eb1870d",
+      "--agents",
+      "8",
+      "--variants",
+      "native,apfs",
+      "--repeats",
+      "1",
+      "--assert-clones"
+    ],
+    "exit": 0,
+    "seconds": 347.0369989871979,
+    "log": "/tmp/git-apfs-v3-final-typescript-concurrent.log",
+    "reports": [
+      "${WORKSPACE}/benchmark-results/agents-latency-b32_f1mk"
+    ]
+  }
+]

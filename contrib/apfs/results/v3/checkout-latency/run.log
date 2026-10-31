@@ -1,0 +1,13 @@
+paired switch small 1 pass []
+paired restore large 0 pass []
+paired restore small 2 pass []
+paired switch large 2 pass []
+paired restore large 1 pass []
+paired switch small 2 pass []
+paired switch large 0 pass []
+paired restore small 1 pass []
+paired switch large 1 pass []
+paired switch small 0 pass []
+paired restore large 2 pass []
+paired restore small 0 pass []
+Report: ${WORKSPACE}/benchmark-results/checkout-latency-1jjncxqd

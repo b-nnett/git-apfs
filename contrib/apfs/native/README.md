@@ -1,5 +1,7 @@
 # Native Git APFS builds and benchmarks
 
+Run the commands below from `contrib/apfs/` in the published fork.
+
 Git APFS is compiled from Git v2.56.0 with an APFS checkout patch. The `git`
 executable uses Git's own built-ins; no command wrapper or post-command
 compaction is involved. The earlier Go allocator is a separate experiment.
@@ -48,6 +50,7 @@ count several probes per file), cloned bytes and worker lease events.
 Always compare against upstream with the same settings. With APFS cloning or a positive
 `apfs.cacheLimit`, FSMonitor is bypassed for safe normal stat validation: stress
 tests exposed missed external edits with concurrent APFS checkout workloads. The
+final matrix reproduced the symptom in equally tuned upstream Git as well. The
 FSEvents interaction remains unresolved; `cache.fsmonitor_stat_guard` reports the
 guard. Configuration remains intact and untracked cache still works.
 
@@ -91,7 +94,8 @@ not aggregate process-tree peak RAM. First status includes daemon startup.
 
 Storage runs use disposable private APFS sparse-image containers and wait for
 stable allocation readings. Source, warmed cache, retained worktrees and cleanup
-are measured; cache storage remains included after worktree removal. A 100 ms
+are measured; cache storage remains included after worktree removal. Agent
+branches and committed objects remain; cleanup does not run garbage collection. A 100 ms
 allocation sampler provides a peak **lower bound**, not an exact transient peak.
 `st_blocks` diagnostics are not unique physical allocation. Latency runs use the
 host filesystem with warm caches; no global cache purge is attempted. Raw JSON

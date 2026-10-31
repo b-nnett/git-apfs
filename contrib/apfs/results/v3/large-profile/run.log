@@ -1,0 +1,709 @@
+17:18:44.439535 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:44.439706 common-init.c:78             | d0 | main                     | start        |     |  0.000649 |           |              | git ls-files -z
+17:18:44.439752 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:44.439854 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo
+17:18:44.439915 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:44.439961 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000907 |           | index        | label:do_read_index .git/index
+17:18:44.439986 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000931 |           | cache_tree   | ..label:read
+17:18:44.439996 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000942 |  0.000011 | cache_tree   | ..label:read
+17:18:44.440002 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000947 |  0.000040 | index        | ..read/version:2
+17:18:44.440006 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000952 |  0.000045 | index        | ..read/cache_nr:133
+17:18:44.440010 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000955 |  0.000048 | index        | label:do_read_index .git/index
+17:18:44.440048 git.c:789                    | d0 | main                     | exit         |     |  0.000993 |           |              | code:0
+17:18:44.440053 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.000998 |           |              | code:0
+17:18:49.154026 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:49.154190 common-init.c:78             | d0 | main                     | start        |     |  0.000569 |           |              | git ls-files -z
+17:18:49.154235 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:49.154427 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/agent-0
+17:18:49.154507 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:49.154558 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000940 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-0/index
+17:18:49.154586 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000968 |           | cache_tree   | ..label:read
+17:18:49.154598 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000980 |  0.000012 | cache_tree   | ..label:read
+17:18:49.154605 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000987 |  0.000047 | index        | ..read/version:2
+17:18:49.154609 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000991 |  0.000051 | index        | ..read/cache_nr:133
+17:18:49.154613 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000995 |  0.000055 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-0/index
+17:18:49.154658 git.c:789                    | d0 | main                     | exit         |     |  0.001040 |           |              | code:0
+17:18:49.154662 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001044 |           |              | code:0
+17:18:49.234995 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:49.235148 common-init.c:78             | d0 | main                     | start        |     |  0.000551 |           |              | git ls-files -z
+17:18:49.235199 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:49.235421 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/agent-1
+17:18:49.235514 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:49.235565 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000971 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-1/index
+17:18:49.235593 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001000 |           | cache_tree   | ..label:read
+17:18:49.235604 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001011 |  0.000011 | cache_tree   | ..label:read
+17:18:49.235610 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001016 |  0.000045 | index        | ..read/version:2
+17:18:49.235613 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001020 |  0.000049 | index        | ..read/cache_nr:133
+17:18:49.235617 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001024 |  0.000053 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-1/index
+17:18:49.235656 git.c:789                    | d0 | main                     | exit         |     |  0.001062 |           |              | code:0
+17:18:49.235660 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001067 |           |              | code:0
+17:18:49.331452 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:49.331641 common-init.c:78             | d0 | main                     | start        |     |  0.000578 |           |              | git ls-files -z
+17:18:49.331686 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:49.331929 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/agent-2
+17:18:49.332008 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:49.332081 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001020 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-2/index
+17:18:49.332120 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001060 |           | cache_tree   | ..label:read
+17:18:49.332131 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001070 |  0.000010 | cache_tree   | ..label:read
+17:18:49.332136 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001076 |  0.000056 | index        | ..read/version:2
+17:18:49.332140 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001079 |  0.000059 | index        | ..read/cache_nr:133
+17:18:49.332143 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001083 |  0.000063 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-2/index
+17:18:49.332189 git.c:789                    | d0 | main                     | exit         |     |  0.001129 |           |              | code:0
+17:18:49.332194 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001133 |           |              | code:0
+17:18:49.426461 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:49.426644 common-init.c:78             | d0 | main                     | start        |     |  0.000579 |           |              | git ls-files -z
+17:18:49.426687 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:49.426886 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/agent-3
+17:18:49.426967 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:49.427017 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000954 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-3/index
+17:18:49.427049 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000987 |           | cache_tree   | ..label:read
+17:18:49.427060 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000998 |  0.000011 | cache_tree   | ..label:read
+17:18:49.427066 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001004 |  0.000050 | index        | ..read/version:2
+17:18:49.427070 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001008 |  0.000054 | index        | ..read/cache_nr:133
+17:18:49.427074 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001011 |  0.000057 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-3/index
+17:18:49.427117 git.c:789                    | d0 | main                     | exit         |     |  0.001054 |           |              | code:0
+17:18:49.427121 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001058 |           |              | code:0
+17:18:49.521267 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:49.521451 common-init.c:78             | d0 | main                     | start        |     |  0.000571 |           |              | git ls-files -z
+17:18:49.521500 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:49.521671 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/agent-4
+17:18:49.521748 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:49.521799 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000922 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-4/index
+17:18:49.521825 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000949 |           | cache_tree   | ..label:read
+17:18:49.521835 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000959 |  0.000010 | cache_tree   | ..label:read
+17:18:49.521841 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000964 |  0.000042 | index        | ..read/version:2
+17:18:49.521844 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000968 |  0.000046 | index        | ..read/cache_nr:133
+17:18:49.521847 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000971 |  0.000049 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-4/index
+17:18:49.521886 git.c:789                    | d0 | main                     | exit         |     |  0.001010 |           |              | code:0
+17:18:49.521890 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001014 |           |              | code:0
+17:18:49.615192 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:49.615365 common-init.c:78             | d0 | main                     | start        |     |  0.000567 |           |              | git ls-files -z
+17:18:49.615412 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:49.615596 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/agent-5
+17:18:49.615675 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:49.615726 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000931 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-5/index
+17:18:49.615753 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000959 |           | cache_tree   | ..label:read
+17:18:49.615764 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000970 |  0.000011 | cache_tree   | ..label:read
+17:18:49.615770 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000975 |  0.000044 | index        | ..read/version:2
+17:18:49.615773 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000979 |  0.000048 | index        | ..read/cache_nr:133
+17:18:49.615777 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000983 |  0.000052 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-5/index
+17:18:49.615827 git.c:789                    | d0 | main                     | exit         |     |  0.001033 |           |              | code:0
+17:18:49.615832 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001038 |           |              | code:0
+17:18:49.709601 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:49.709794 common-init.c:78             | d0 | main                     | start        |     |  0.000571 |           |              | git ls-files -z
+17:18:49.709839 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:49.710041 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/agent-6
+17:18:49.710118 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:49.710180 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000960 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-6/index
+17:18:49.710208 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000987 |           | cache_tree   | ..label:read
+17:18:49.710217 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000997 |  0.000010 | cache_tree   | ..label:read
+17:18:49.710223 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001003 |  0.000043 | index        | ..read/version:2
+17:18:49.710227 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001006 |  0.000046 | index        | ..read/cache_nr:133
+17:18:49.710230 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001010 |  0.000050 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-6/index
+17:18:49.710271 git.c:789                    | d0 | main                     | exit         |     |  0.001051 |           |              | code:0
+17:18:49.710275 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001055 |           |              | code:0
+17:18:49.804014 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:49.804207 common-init.c:78             | d0 | main                     | start        |     |  0.000567 |           |              | git ls-files -z
+17:18:49.804253 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:49.804440 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/agent-7
+17:18:49.804516 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:49.804563 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000926 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-7/index
+17:18:49.804595 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000957 |           | cache_tree   | ..label:read
+17:18:49.804605 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000968 |  0.000011 | cache_tree   | ..label:read
+17:18:49.804611 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000974 |  0.000048 | index        | ..read/version:2
+17:18:49.804615 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000978 |  0.000052 | index        | ..read/cache_nr:133
+17:18:49.804619 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000981 |  0.000055 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-wgz327z4/repo/.git/worktrees/agent-7/index
+17:18:49.804654 git.c:789                    | d0 | main                     | exit         |     |  0.001017 |           |              | code:0
+17:18:49.804658 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001021 |           |              | code:0
+paired restore large 1 pass []
+17:18:53.629773 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:18:53.629928 common-init.c:78             | d0 | main                     | start        |     |  0.000567 |           |              | git ls-files -z
+17:18:53.629974 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:18:53.630089 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo
+17:18:53.630151 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:18:53.630201 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000842 |           | index        | label:do_read_index .git/index
+17:18:53.630226 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000868 |           | cache_tree   | ..label:read
+17:18:53.630242 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000883 |  0.000015 | cache_tree   | ..label:read
+17:18:53.630247 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000888 |  0.000046 | index        | ..read/version:2
+17:18:53.630250 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000892 |  0.000050 | index        | ..read/cache_nr:133
+17:18:53.630257 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000899 |  0.000057 | index        | label:do_read_index .git/index
+17:18:53.630299 git.c:789                    | d0 | main                     | exit         |     |  0.000940 |           |              | code:0
+17:18:53.630303 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.000945 |           |              | code:0
+17:19:00.554461 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:00.554653 common-init.c:78             | d0 | main                     | start        |     |  0.000639 |           |              | git ls-files -z
+17:19:00.554701 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:00.555004 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/agent-0
+17:19:00.555092 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:00.555145 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001132 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-0/index
+17:19:00.555171 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001159 |           | cache_tree   | ..label:read
+17:19:00.555184 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001172 |  0.000013 | cache_tree   | ..label:read
+17:19:00.555192 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001180 |  0.000048 | index        | ..read/version:2
+17:19:00.555198 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001185 |  0.000053 | index        | ..read/cache_nr:133
+17:19:00.555202 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001189 |  0.000057 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-0/index
+17:19:00.555245 git.c:789                    | d0 | main                     | exit         |     |  0.001233 |           |              | code:0
+17:19:00.555251 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001239 |           |              | code:0
+17:19:00.648451 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:00.648613 common-init.c:78             | d0 | main                     | start        |     |  0.000565 |           |              | git ls-files -z
+17:19:00.648667 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:00.648844 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/agent-1
+17:19:00.648926 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:00.648979 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000933 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-1/index
+17:19:00.649008 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000962 |           | cache_tree   | ..label:read
+17:19:00.649018 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000973 |  0.000011 | cache_tree   | ..label:read
+17:19:00.649024 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000979 |  0.000046 | index        | ..read/version:2
+17:19:00.649028 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000983 |  0.000050 | index        | ..read/cache_nr:133
+17:19:00.649031 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000986 |  0.000053 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-1/index
+17:19:00.649083 git.c:789                    | d0 | main                     | exit         |     |  0.001037 |           |              | code:0
+17:19:00.649088 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001043 |           |              | code:0
+17:19:00.742168 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:00.742331 common-init.c:78             | d0 | main                     | start        |     |  0.000558 |           |              | git ls-files -z
+17:19:00.742382 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:00.742630 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/agent-2
+17:19:00.742759 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:00.742818 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001047 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-2/index
+17:19:00.742853 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001083 |           | cache_tree   | ..label:read
+17:19:00.742864 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001094 |  0.000011 | cache_tree   | ..label:read
+17:19:00.742870 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001100 |  0.000053 | index        | ..read/version:2
+17:19:00.742874 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001104 |  0.000057 | index        | ..read/cache_nr:133
+17:19:00.742878 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001108 |  0.000061 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-2/index
+17:19:00.742921 git.c:789                    | d0 | main                     | exit         |     |  0.001151 |           |              | code:0
+17:19:00.742926 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001156 |           |              | code:0
+17:19:00.834201 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:00.834372 common-init.c:78             | d0 | main                     | start        |     |  0.000567 |           |              | git ls-files -z
+17:19:00.834418 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:00.834608 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/agent-3
+17:19:00.834688 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:00.834737 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000935 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-3/index
+17:19:00.834763 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000961 |           | cache_tree   | ..label:read
+17:19:00.834781 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000979 |  0.000018 | cache_tree   | ..label:read
+17:19:00.834786 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000984 |  0.000049 | index        | ..read/version:2
+17:19:00.834790 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000988 |  0.000053 | index        | ..read/cache_nr:133
+17:19:00.834794 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000991 |  0.000056 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-3/index
+17:19:00.834833 git.c:789                    | d0 | main                     | exit         |     |  0.001030 |           |              | code:0
+17:19:00.834837 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001035 |           |              | code:0
+17:19:00.926381 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:00.926567 common-init.c:78             | d0 | main                     | start        |     |  0.000692 |           |              | git ls-files -z
+17:19:00.926619 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:00.926799 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/agent-4
+17:19:00.926883 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:00.926936 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001065 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-4/index
+17:19:00.926971 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001100 |           | cache_tree   | ..label:read
+17:19:00.926983 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001111 |  0.000011 | cache_tree   | ..label:read
+17:19:00.926989 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001118 |  0.000053 | index        | ..read/version:2
+17:19:00.926993 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001122 |  0.000057 | index        | ..read/cache_nr:133
+17:19:00.926997 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001125 |  0.000060 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-4/index
+17:19:00.927035 git.c:789                    | d0 | main                     | exit         |     |  0.001164 |           |              | code:0
+17:19:00.927040 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001169 |           |              | code:0
+17:19:01.024064 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:01.024157 common-init.c:78             | d0 | main                     | start        |     |  0.000492 |           |              | git ls-files -z
+17:19:01.024208 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:01.024385 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/agent-5
+17:19:01.024463 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:01.024511 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000849 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-5/index
+17:19:01.024539 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000877 |           | cache_tree   | ..label:read
+17:19:01.024551 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000888 |  0.000011 | cache_tree   | ..label:read
+17:19:01.024556 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000894 |  0.000045 | index        | ..read/version:2
+17:19:01.024560 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000898 |  0.000049 | index        | ..read/cache_nr:133
+17:19:01.024564 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000902 |  0.000053 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-5/index
+17:19:01.024609 git.c:789                    | d0 | main                     | exit         |     |  0.000947 |           |              | code:0
+17:19:01.024614 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.000951 |           |              | code:0
+17:19:01.115953 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:01.116140 common-init.c:78             | d0 | main                     | start        |     |  0.000694 |           |              | git ls-files -z
+17:19:01.116200 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:01.116388 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/agent-6
+17:19:01.116482 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:01.116538 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001095 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-6/index
+17:19:01.116569 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001126 |           | cache_tree   | ..label:read
+17:19:01.116581 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001138 |  0.000012 | cache_tree   | ..label:read
+17:19:01.116587 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001143 |  0.000048 | index        | ..read/version:2
+17:19:01.116590 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001147 |  0.000052 | index        | ..read/cache_nr:133
+17:19:01.116594 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001150 |  0.000055 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-6/index
+17:19:01.116649 git.c:789                    | d0 | main                     | exit         |     |  0.001206 |           |              | code:0
+17:19:01.116655 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001211 |           |              | code:0
+17:19:01.208446 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:01.208635 common-init.c:78             | d0 | main                     | start        |     |  0.000598 |           |              | git ls-files -z
+17:19:01.208683 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:01.208859 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/agent-7
+17:19:01.208939 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:01.208992 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000957 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-7/index
+17:19:01.209021 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000987 |           | cache_tree   | ..label:read
+17:19:01.209032 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000997 |  0.000010 | cache_tree   | ..label:read
+17:19:01.209038 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001004 |  0.000047 | index        | ..read/version:2
+17:19:01.209041 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001007 |  0.000050 | index        | ..read/cache_nr:133
+17:19:01.209045 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001010 |  0.000053 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-m_f9bp8z/repo/.git/worktrees/agent-7/index
+17:19:01.209084 git.c:789                    | d0 | main                     | exit         |     |  0.001050 |           |              | code:0
+17:19:01.209089 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001055 |           |              | code:0
+paired switch large 2 pass []
+17:19:04.797216 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:04.797433 common-init.c:78             | d0 | main                     | start        |     |  0.000583 |           |              | git ls-files -z
+17:19:04.797482 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:04.797592 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo
+17:19:04.797656 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:04.797704 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000856 |           | index        | label:do_read_index .git/index
+17:19:04.797730 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000883 |           | cache_tree   | ..label:read
+17:19:04.797747 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000900 |  0.000017 | cache_tree   | ..label:read
+17:19:04.797753 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000906 |  0.000050 | index        | ..read/version:2
+17:19:04.797756 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000909 |  0.000053 | index        | ..read/cache_nr:133
+17:19:04.797760 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000912 |  0.000056 | index        | label:do_read_index .git/index
+17:19:04.797801 git.c:789                    | d0 | main                     | exit         |     |  0.000954 |           |              | code:0
+17:19:04.797806 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.000959 |           |              | code:0
+17:19:12.012772 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:12.012988 common-init.c:78             | d0 | main                     | start        |     |  0.000655 |           |              | git ls-files -z
+17:19:12.013043 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:12.013214 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/agent-0
+17:19:12.013295 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:12.013347 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001016 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-0/index
+17:19:12.013376 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001046 |           | cache_tree   | ..label:read
+17:19:12.013388 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001058 |  0.000012 | cache_tree   | ..label:read
+17:19:12.013394 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001064 |  0.000048 | index        | ..read/version:2
+17:19:12.013399 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001068 |  0.000052 | index        | ..read/cache_nr:133
+17:19:12.013402 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001072 |  0.000056 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-0/index
+17:19:12.013443 git.c:789                    | d0 | main                     | exit         |     |  0.001112 |           |              | code:0
+17:19:12.013448 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001117 |           |              | code:0
+17:19:12.090776 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:12.090991 common-init.c:78             | d0 | main                     | start        |     |  0.000701 |           |              | git ls-files -z
+17:19:12.091045 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:12.091226 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/agent-1
+17:19:12.091320 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:12.091376 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001089 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-1/index
+17:19:12.091405 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001119 |           | cache_tree   | ..label:read
+17:19:12.091416 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001129 |  0.000010 | cache_tree   | ..label:read
+17:19:12.091423 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001137 |  0.000048 | index        | ..read/version:2
+17:19:12.091427 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001141 |  0.000052 | index        | ..read/cache_nr:133
+17:19:12.091431 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001144 |  0.000055 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-1/index
+17:19:12.091471 git.c:789                    | d0 | main                     | exit         |     |  0.001185 |           |              | code:0
+17:19:12.091476 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001190 |           |              | code:0
+17:19:12.183667 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:12.183857 common-init.c:78             | d0 | main                     | start        |     |  0.000733 |           |              | git ls-files -z
+17:19:12.183921 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:12.184117 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/agent-2
+17:19:12.184202 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:12.184254 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001133 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-2/index
+17:19:12.184287 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001166 |           | cache_tree   | ..label:read
+17:19:12.184298 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001177 |  0.000011 | cache_tree   | ..label:read
+17:19:12.184303 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001183 |  0.000050 | index        | ..read/version:2
+17:19:12.184307 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001187 |  0.000054 | index        | ..read/cache_nr:133
+17:19:12.184310 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001190 |  0.000057 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-2/index
+17:19:12.184355 git.c:789                    | d0 | main                     | exit         |     |  0.001235 |           |              | code:0
+17:19:12.184360 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001239 |           |              | code:0
+17:19:12.277846 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:12.278065 common-init.c:78             | d0 | main                     | start        |     |  0.000711 |           |              | git ls-files -z
+17:19:12.278113 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:12.278306 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/agent-3
+17:19:12.278398 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:12.278451 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001099 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-3/index
+17:19:12.278481 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001130 |           | cache_tree   | ..label:read
+17:19:12.278495 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001144 |  0.000014 | cache_tree   | ..label:read
+17:19:12.278502 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001150 |  0.000051 | index        | ..read/version:2
+17:19:12.278507 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001156 |  0.000057 | index        | ..read/cache_nr:133
+17:19:12.278512 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001161 |  0.000062 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-3/index
+17:19:12.278555 git.c:789                    | d0 | main                     | exit         |     |  0.001204 |           |              | code:0
+17:19:12.278561 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001210 |           |              | code:0
+17:19:12.371295 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:12.371511 common-init.c:78             | d0 | main                     | start        |     |  0.000679 |           |              | git ls-files -z
+17:19:12.371559 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:12.371839 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/agent-4
+17:19:12.371973 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:12.372045 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001216 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-4/index
+17:19:12.372081 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001252 |           | cache_tree   | ..label:read
+17:19:12.372093 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001264 |  0.000012 | cache_tree   | ..label:read
+17:19:12.372111 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001281 |  0.000065 | index        | ..read/version:2
+17:19:12.372117 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001288 |  0.000072 | index        | ..read/cache_nr:133
+17:19:12.372123 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001294 |  0.000078 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-4/index
+17:19:12.372165 git.c:789                    | d0 | main                     | exit         |     |  0.001336 |           |              | code:0
+17:19:12.372172 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001343 |           |              | code:0
+17:19:12.463698 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:12.463891 common-init.c:78             | d0 | main                     | start        |     |  0.000625 |           |              | git ls-files -z
+17:19:12.463941 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:12.464174 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/agent-5
+17:19:12.464281 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:12.464335 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001072 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-5/index
+17:19:12.464364 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001100 |           | cache_tree   | ..label:read
+17:19:12.464374 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001111 |  0.000011 | cache_tree   | ..label:read
+17:19:12.464380 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001117 |  0.000045 | index        | ..read/version:2
+17:19:12.464384 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001121 |  0.000049 | index        | ..read/cache_nr:133
+17:19:12.464389 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001125 |  0.000053 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-5/index
+17:19:12.464425 git.c:789                    | d0 | main                     | exit         |     |  0.001161 |           |              | code:0
+17:19:12.464429 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001166 |           |              | code:0
+17:19:12.555523 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:12.555724 common-init.c:78             | d0 | main                     | start        |     |  0.000643 |           |              | git ls-files -z
+17:19:12.555770 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:12.555932 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/agent-6
+17:19:12.556015 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:12.556065 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000985 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-6/index
+17:19:12.556093 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001014 |           | cache_tree   | ..label:read
+17:19:12.556103 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001024 |  0.000010 | cache_tree   | ..label:read
+17:19:12.556110 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001030 |  0.000045 | index        | ..read/version:2
+17:19:12.556113 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001034 |  0.000049 | index        | ..read/cache_nr:133
+17:19:12.556117 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001037 |  0.000052 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-6/index
+17:19:12.556154 git.c:789                    | d0 | main                     | exit         |     |  0.001075 |           |              | code:0
+17:19:12.556158 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001079 |           |              | code:0
+17:19:12.646987 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:12.647184 common-init.c:78             | d0 | main                     | start        |     |  0.000602 |           |              | git ls-files -z
+17:19:12.647236 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:12.647413 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/agent-7
+17:19:12.647492 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:12.647542 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000962 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-7/index
+17:19:12.647569 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000990 |           | cache_tree   | ..label:read
+17:19:12.647579 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001000 |  0.000010 | cache_tree   | ..label:read
+17:19:12.647586 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001007 |  0.000045 | index        | ..read/version:2
+17:19:12.647590 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001011 |  0.000049 | index        | ..read/cache_nr:133
+17:19:12.647593 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001014 |  0.000052 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-jc463cf2/repo/.git/worktrees/agent-7/index
+17:19:12.647629 git.c:789                    | d0 | main                     | exit         |     |  0.001050 |           |              | code:0
+17:19:12.647641 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001061 |           |              | code:0
+paired switch large 1 pass []
+17:19:16.067363 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:16.067520 common-init.c:78             | d0 | main                     | start        |     |  0.000510 |           |              | git ls-files -z
+17:19:16.067570 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:16.067670 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo
+17:19:16.067732 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:16.067787 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000779 |           | index        | label:do_read_index .git/index
+17:19:16.067820 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000813 |           | cache_tree   | ..label:read
+17:19:16.067832 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000825 |  0.000012 | cache_tree   | ..label:read
+17:19:16.067837 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000830 |  0.000051 | index        | ..read/version:2
+17:19:16.067840 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000833 |  0.000054 | index        | ..read/cache_nr:133
+17:19:16.067844 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000836 |  0.000057 | index        | label:do_read_index .git/index
+17:19:16.067883 git.c:789                    | d0 | main                     | exit         |     |  0.000876 |           |              | code:0
+17:19:16.067888 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.000880 |           |              | code:0
+17:19:23.015527 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:23.015744 common-init.c:78             | d0 | main                     | start        |     |  0.000626 |           |              | git ls-files -z
+17:19:23.015800 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:23.015997 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/agent-0
+17:19:23.016086 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:23.016138 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001023 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-0/index
+17:19:23.016166 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001051 |           | cache_tree   | ..label:read
+17:19:23.016176 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001061 |  0.000010 | cache_tree   | ..label:read
+17:19:23.016182 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001066 |  0.000043 | index        | ..read/version:2
+17:19:23.016185 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001070 |  0.000047 | index        | ..read/cache_nr:133
+17:19:23.016195 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001079 |  0.000056 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-0/index
+17:19:23.016239 git.c:789                    | d0 | main                     | exit         |     |  0.001124 |           |              | code:0
+17:19:23.016243 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001128 |           |              | code:0
+17:19:23.107425 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:23.107626 common-init.c:78             | d0 | main                     | start        |     |  0.000628 |           |              | git ls-files -z
+17:19:23.107678 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:23.107870 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/agent-1
+17:19:23.107962 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:23.108026 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001031 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-1/index
+17:19:23.108054 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001060 |           | cache_tree   | ..label:read
+17:19:23.108064 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001070 |  0.000010 | cache_tree   | ..label:read
+17:19:23.108071 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001076 |  0.000045 | index        | ..read/version:2
+17:19:23.108075 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001080 |  0.000049 | index        | ..read/cache_nr:133
+17:19:23.108079 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001084 |  0.000053 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-1/index
+17:19:23.108117 git.c:789                    | d0 | main                     | exit         |     |  0.001123 |           |              | code:0
+17:19:23.108121 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001126 |           |              | code:0
+17:19:23.199223 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:23.199432 common-init.c:78             | d0 | main                     | start        |     |  0.000667 |           |              | git ls-files -z
+17:19:23.199486 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:23.199668 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/agent-2
+17:19:23.199767 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:23.199820 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001058 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-2/index
+17:19:23.199849 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001087 |           | cache_tree   | ..label:read
+17:19:23.199859 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001097 |  0.000010 | cache_tree   | ..label:read
+17:19:23.199865 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001104 |  0.000046 | index        | ..read/version:2
+17:19:23.199869 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001108 |  0.000050 | index        | ..read/cache_nr:133
+17:19:23.199873 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001112 |  0.000054 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-2/index
+17:19:23.199913 git.c:789                    | d0 | main                     | exit         |     |  0.001152 |           |              | code:0
+17:19:23.199917 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001156 |           |              | code:0
+17:19:23.291221 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:23.291449 common-init.c:78             | d0 | main                     | start        |     |  0.000694 |           |              | git ls-files -z
+17:19:23.291502 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:23.291676 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/agent-3
+17:19:23.291753 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:23.291803 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001050 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-3/index
+17:19:23.291829 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001076 |           | cache_tree   | ..label:read
+17:19:23.291840 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001088 |  0.000012 | cache_tree   | ..label:read
+17:19:23.291845 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001093 |  0.000043 | index        | ..read/version:2
+17:19:23.291849 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001096 |  0.000046 | index        | ..read/cache_nr:133
+17:19:23.291852 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001100 |  0.000050 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-3/index
+17:19:23.291891 git.c:789                    | d0 | main                     | exit         |     |  0.001139 |           |              | code:0
+17:19:23.291895 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001143 |           |              | code:0
+17:19:23.382894 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:23.383069 common-init.c:78             | d0 | main                     | start        |     |  0.000591 |           |              | git ls-files -z
+17:19:23.383118 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:23.383320 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/agent-4
+17:19:23.383408 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:23.383462 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000987 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-4/index
+17:19:23.383490 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001016 |           | cache_tree   | ..label:read
+17:19:23.383501 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001027 |  0.000011 | cache_tree   | ..label:read
+17:19:23.383507 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001032 |  0.000045 | index        | ..read/version:2
+17:19:23.383510 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001036 |  0.000049 | index        | ..read/cache_nr:133
+17:19:23.383514 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001039 |  0.000052 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-4/index
+17:19:23.383557 git.c:789                    | d0 | main                     | exit         |     |  0.001082 |           |              | code:0
+17:19:23.383561 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001087 |           |              | code:0
+17:19:23.474473 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:23.474676 common-init.c:78             | d0 | main                     | start        |     |  0.000622 |           |              | git ls-files -z
+17:19:23.474730 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:23.474891 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/agent-5
+17:19:23.474970 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:23.475022 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000970 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-5/index
+17:19:23.475055 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001004 |           | cache_tree   | ..label:read
+17:19:23.475067 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001015 |  0.000011 | cache_tree   | ..label:read
+17:19:23.475073 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001022 |  0.000052 | index        | ..read/version:2
+17:19:23.475077 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001026 |  0.000056 | index        | ..read/cache_nr:133
+17:19:23.475081 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001030 |  0.000060 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-5/index
+17:19:23.475123 git.c:789                    | d0 | main                     | exit         |     |  0.001072 |           |              | code:0
+17:19:23.475127 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001076 |           |              | code:0
+17:19:23.566572 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:23.566773 common-init.c:78             | d0 | main                     | start        |     |  0.000655 |           |              | git ls-files -z
+17:19:23.566820 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:23.567001 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/agent-6
+17:19:23.567094 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:23.567142 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001026 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-6/index
+17:19:23.567170 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001055 |           | cache_tree   | ..label:read
+17:19:23.567181 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001066 |  0.000011 | cache_tree   | ..label:read
+17:19:23.567188 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001073 |  0.000047 | index        | ..read/version:2
+17:19:23.567193 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001078 |  0.000052 | index        | ..read/cache_nr:133
+17:19:23.567197 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001081 |  0.000055 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-6/index
+17:19:23.567235 git.c:789                    | d0 | main                     | exit         |     |  0.001120 |           |              | code:0
+17:19:23.567239 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001124 |           |              | code:0
+17:19:23.657993 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:23.658209 common-init.c:78             | d0 | main                     | start        |     |  0.000649 |           |              | git ls-files -z
+17:19:23.658261 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:23.658431 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/agent-7
+17:19:23.658511 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:23.658561 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001004 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-7/index
+17:19:23.658588 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001032 |           | cache_tree   | ..label:read
+17:19:23.658600 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001043 |  0.000011 | cache_tree   | ..label:read
+17:19:23.658605 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001049 |  0.000045 | index        | ..read/version:2
+17:19:23.658608 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001052 |  0.000048 | index        | ..read/cache_nr:133
+17:19:23.658611 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001055 |  0.000051 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-switch-large-n7ehy1pl/repo/.git/worktrees/agent-7/index
+17:19:23.658663 git.c:789                    | d0 | main                     | exit         |     |  0.001107 |           |              | code:0
+17:19:23.658668 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001111 |           |              | code:0
+paired switch large 0 pass []
+17:19:27.090386 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:27.090552 common-init.c:78             | d0 | main                     | start        |     |  0.000520 |           |              | git ls-files -z
+17:19:27.090601 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:27.090711 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo
+17:19:27.090784 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:27.090838 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000809 |           | index        | label:do_read_index .git/index
+17:19:27.090865 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000836 |           | cache_tree   | ..label:read
+17:19:27.090876 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000847 |  0.000011 | cache_tree   | ..label:read
+17:19:27.090882 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000852 |  0.000043 | index        | ..read/version:2
+17:19:27.090885 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000856 |  0.000047 | index        | ..read/cache_nr:133
+17:19:27.090888 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000859 |  0.000050 | index        | label:do_read_index .git/index
+17:19:27.090926 git.c:789                    | d0 | main                     | exit         |     |  0.000897 |           |              | code:0
+17:19:27.090931 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.000902 |           |              | code:0
+17:19:31.884518 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:31.884697 common-init.c:78             | d0 | main                     | start        |     |  0.000606 |           |              | git ls-files -z
+17:19:31.884749 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:31.884944 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/agent-0
+17:19:31.885024 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:31.885074 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000985 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-0/index
+17:19:31.885108 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001019 |           | cache_tree   | ..label:read
+17:19:31.885119 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001031 |  0.000012 | cache_tree   | ..label:read
+17:19:31.885124 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001036 |  0.000051 | index        | ..read/version:2
+17:19:31.885127 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001039 |  0.000054 | index        | ..read/cache_nr:133
+17:19:31.885131 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001043 |  0.000058 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-0/index
+17:19:31.885169 git.c:789                    | d0 | main                     | exit         |     |  0.001081 |           |              | code:0
+17:19:31.885173 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001085 |           |              | code:0
+17:19:31.981648 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:31.981876 common-init.c:78             | d0 | main                     | start        |     |  0.000661 |           |              | git ls-files -z
+17:19:31.981926 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:31.982127 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/agent-1
+17:19:31.982212 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:31.982268 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001056 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-1/index
+17:19:31.982299 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001088 |           | cache_tree   | ..label:read
+17:19:31.982312 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001101 |  0.000013 | cache_tree   | ..label:read
+17:19:31.982318 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001107 |  0.000051 | index        | ..read/version:2
+17:19:31.982321 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001110 |  0.000054 | index        | ..read/cache_nr:133
+17:19:31.982325 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001114 |  0.000058 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-1/index
+17:19:31.982367 git.c:789                    | d0 | main                     | exit         |     |  0.001156 |           |              | code:0
+17:19:31.982372 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001161 |           |              | code:0
+17:19:32.061617 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:32.061774 common-init.c:78             | d0 | main                     | start        |     |  0.000565 |           |              | git ls-files -z
+17:19:32.061818 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:32.062006 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/agent-2
+17:19:32.062095 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:32.062145 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000938 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-2/index
+17:19:32.062172 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000965 |           | cache_tree   | ..label:read
+17:19:32.062182 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000976 |  0.000011 | cache_tree   | ..label:read
+17:19:32.062188 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000981 |  0.000043 | index        | ..read/version:2
+17:19:32.062191 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000985 |  0.000047 | index        | ..read/cache_nr:133
+17:19:32.062194 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000988 |  0.000050 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-2/index
+17:19:32.062232 git.c:789                    | d0 | main                     | exit         |     |  0.001026 |           |              | code:0
+17:19:32.062236 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001030 |           |              | code:0
+17:19:32.158319 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:32.158494 common-init.c:78             | d0 | main                     | start        |     |  0.000615 |           |              | git ls-files -z
+17:19:32.158557 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:32.158768 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/agent-3
+17:19:32.158863 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:32.158921 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001045 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-3/index
+17:19:32.158959 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001084 |           | cache_tree   | ..label:read
+17:19:32.158970 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001095 |  0.000011 | cache_tree   | ..label:read
+17:19:32.158977 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001102 |  0.000057 | index        | ..read/version:2
+17:19:32.158981 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001105 |  0.000060 | index        | ..read/cache_nr:133
+17:19:32.158984 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001109 |  0.000064 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-3/index
+17:19:32.159029 git.c:789                    | d0 | main                     | exit         |     |  0.001154 |           |              | code:0
+17:19:32.159035 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001158 |           |              | code:0
+17:19:32.254517 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:32.254708 common-init.c:78             | d0 | main                     | start        |     |  0.000588 |           |              | git ls-files -z
+17:19:32.254757 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:32.254934 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/agent-4
+17:19:32.255018 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:32.255070 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000952 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-4/index
+17:19:32.255102 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000984 |           | cache_tree   | ..label:read
+17:19:32.255112 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000994 |  0.000010 | cache_tree   | ..label:read
+17:19:32.255118 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001000 |  0.000048 | index        | ..read/version:2
+17:19:32.255121 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001004 |  0.000052 | index        | ..read/cache_nr:133
+17:19:32.255125 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001007 |  0.000055 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-4/index
+17:19:32.255164 git.c:789                    | d0 | main                     | exit         |     |  0.001047 |           |              | code:0
+17:19:32.255168 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001051 |           |              | code:0
+17:19:32.349758 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:32.349937 common-init.c:78             | d0 | main                     | start        |     |  0.000600 |           |              | git ls-files -z
+17:19:32.349985 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:32.350190 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/agent-5
+17:19:32.350266 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:32.350313 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000979 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-5/index
+17:19:32.350339 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001005 |           | cache_tree   | ..label:read
+17:19:32.350350 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001016 |  0.000011 | cache_tree   | ..label:read
+17:19:32.350355 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001021 |  0.000042 | index        | ..read/version:2
+17:19:32.350359 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001025 |  0.000046 | index        | ..read/cache_nr:133
+17:19:32.350363 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001029 |  0.000050 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-5/index
+17:19:32.350402 git.c:789                    | d0 | main                     | exit         |     |  0.001068 |           |              | code:0
+17:19:32.350406 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001071 |           |              | code:0
+17:19:32.443366 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:32.443559 common-init.c:78             | d0 | main                     | start        |     |  0.000538 |           |              | git ls-files -z
+17:19:32.443607 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:32.443776 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/agent-6
+17:19:32.443850 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:32.443897 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000879 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-6/index
+17:19:32.443930 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000912 |           | cache_tree   | ..label:read
+17:19:32.443941 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000923 |  0.000011 | cache_tree   | ..label:read
+17:19:32.443948 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000929 |  0.000050 | index        | ..read/version:2
+17:19:32.443952 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000933 |  0.000054 | index        | ..read/cache_nr:133
+17:19:32.443955 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000937 |  0.000058 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-6/index
+17:19:32.443991 git.c:789                    | d0 | main                     | exit         |     |  0.000973 |           |              | code:0
+17:19:32.443996 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.000977 |           |              | code:0
+17:19:32.537151 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:32.537335 common-init.c:78             | d0 | main                     | start        |     |  0.000567 |           |              | git ls-files -z
+17:19:32.537377 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:32.537566 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/agent-7
+17:19:32.537649 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:32.537698 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000932 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-7/index
+17:19:32.537724 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000959 |           | cache_tree   | ..label:read
+17:19:32.537734 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000969 |  0.000010 | cache_tree   | ..label:read
+17:19:32.537741 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000976 |  0.000044 | index        | ..read/version:2
+17:19:32.537745 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000980 |  0.000048 | index        | ..read/cache_nr:133
+17:19:32.537749 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000984 |  0.000052 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-vsxci_q5/repo/.git/worktrees/agent-7/index
+17:19:32.537786 git.c:789                    | d0 | main                     | exit         |     |  0.001021 |           |              | code:0
+17:19:32.537790 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001024 |           |              | code:0
+paired restore large 2 pass []
+17:19:35.965424 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:35.965591 common-init.c:78             | d0 | main                     | start        |     |  0.000538 |           |              | git ls-files -z
+17:19:35.965642 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:35.965759 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo
+17:19:35.965837 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:35.965892 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000842 |           | index        | label:do_read_index .git/index
+17:19:35.965918 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000868 |           | cache_tree   | ..label:read
+17:19:35.965930 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000880 |  0.000012 | cache_tree   | ..label:read
+17:19:35.965936 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.000885 |  0.000043 | index        | ..read/version:2
+17:19:35.965940 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.000890 |  0.000048 | index        | ..read/cache_nr:133
+17:19:35.965944 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.000894 |  0.000052 | index        | label:do_read_index .git/index
+17:19:35.965984 git.c:789                    | d0 | main                     | exit         |     |  0.000934 |           |              | code:0
+17:19:35.965989 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.000938 |           |              | code:0
+17:19:40.708430 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:40.708625 common-init.c:78             | d0 | main                     | start        |     |  0.000656 |           |              | git ls-files -z
+17:19:40.708679 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:40.708858 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/agent-0
+17:19:40.708935 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:40.708983 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001017 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-0/index
+17:19:40.709011 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001045 |           | cache_tree   | ..label:read
+17:19:40.709021 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001055 |  0.000010 | cache_tree   | ..label:read
+17:19:40.709028 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001061 |  0.000044 | index        | ..read/version:2
+17:19:40.709031 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001065 |  0.000048 | index        | ..read/cache_nr:133
+17:19:40.709034 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001068 |  0.000051 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-0/index
+17:19:40.709072 git.c:789                    | d0 | main                     | exit         |     |  0.001106 |           |              | code:0
+17:19:40.709076 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001110 |           |              | code:0
+17:19:40.805489 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:40.805663 common-init.c:78             | d0 | main                     | start        |     |  0.000534 |           |              | git ls-files -z
+17:19:40.805712 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:40.805918 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/agent-1
+17:19:40.806032 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:40.806088 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000961 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-1/index
+17:19:40.806115 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.000988 |           | cache_tree   | ..label:read
+17:19:40.806125 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.000999 |  0.000011 | cache_tree   | ..label:read
+17:19:40.806132 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001005 |  0.000044 | index        | ..read/version:2
+17:19:40.806135 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001009 |  0.000048 | index        | ..read/cache_nr:133
+17:19:40.806139 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001012 |  0.000051 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-1/index
+17:19:40.806176 git.c:789                    | d0 | main                     | exit         |     |  0.001050 |           |              | code:0
+17:19:40.806181 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001054 |           |              | code:0
+17:19:40.901515 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:40.901718 common-init.c:78             | d0 | main                     | start        |     |  0.000637 |           |              | git ls-files -z
+17:19:40.901765 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:40.901943 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/agent-2
+17:19:40.902042 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:40.902091 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001012 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-2/index
+17:19:40.902118 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001040 |           | cache_tree   | ..label:read
+17:19:40.902128 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001050 |  0.000010 | cache_tree   | ..label:read
+17:19:40.902135 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001056 |  0.000044 | index        | ..read/version:2
+17:19:40.902139 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001061 |  0.000049 | index        | ..read/cache_nr:133
+17:19:40.902143 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001064 |  0.000052 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-2/index
+17:19:40.902182 git.c:789                    | d0 | main                     | exit         |     |  0.001103 |           |              | code:0
+17:19:40.902186 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001107 |           |              | code:0
+17:19:40.981616 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:40.981856 common-init.c:78             | d0 | main                     | start        |     |  0.000620 |           |              | git ls-files -z
+17:19:40.981903 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:40.982187 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/agent-3
+17:19:40.982319 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:40.982384 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001151 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-3/index
+17:19:40.982420 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001188 |           | cache_tree   | ..label:read
+17:19:40.982432 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001200 |  0.000012 | cache_tree   | ..label:read
+17:19:40.982438 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001206 |  0.000055 | index        | ..read/version:2
+17:19:40.982442 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001209 |  0.000058 | index        | ..read/cache_nr:133
+17:19:40.982445 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001212 |  0.000061 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-3/index
+17:19:40.982490 git.c:789                    | d0 | main                     | exit         |     |  0.001258 |           |              | code:0
+17:19:40.982495 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001263 |           |              | code:0
+17:19:41.077916 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:41.078099 common-init.c:78             | d0 | main                     | start        |     |  0.000613 |           |              | git ls-files -z
+17:19:41.078146 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:41.078334 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/agent-4
+17:19:41.078413 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:41.078467 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.000984 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-4/index
+17:19:41.078500 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001016 |           | cache_tree   | ..label:read
+17:19:41.078510 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001027 |  0.000011 | cache_tree   | ..label:read
+17:19:41.078515 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001032 |  0.000048 | index        | ..read/version:2
+17:19:41.078519 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001035 |  0.000051 | index        | ..read/cache_nr:133
+17:19:41.078523 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001039 |  0.000055 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-4/index
+17:19:41.078566 git.c:789                    | d0 | main                     | exit         |     |  0.001082 |           |              | code:0
+17:19:41.078570 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001087 |           |              | code:0
+17:19:41.174363 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:41.174586 common-init.c:78             | d0 | main                     | start        |     |  0.000640 |           |              | git ls-files -z
+17:19:41.174631 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:41.174874 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/agent-5
+17:19:41.174988 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:41.175048 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001105 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-5/index
+17:19:41.175081 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001138 |           | cache_tree   | ..label:read
+17:19:41.175092 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001149 |  0.000011 | cache_tree   | ..label:read
+17:19:41.175097 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001154 |  0.000049 | index        | ..read/version:2
+17:19:41.175101 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001158 |  0.000053 | index        | ..read/cache_nr:133
+17:19:41.175105 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001161 |  0.000056 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-5/index
+17:19:41.175144 git.c:789                    | d0 | main                     | exit         |     |  0.001201 |           |              | code:0
+17:19:41.175148 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001205 |           |              | code:0
+17:19:41.270572 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:41.270772 common-init.c:78             | d0 | main                     | start        |     |  0.000651 |           |              | git ls-files -z
+17:19:41.270820 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:41.271004 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/agent-6
+17:19:41.271096 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:41.271146 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001027 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-6/index
+17:19:41.271175 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001057 |           | cache_tree   | ..label:read
+17:19:41.271187 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001069 |  0.000012 | cache_tree   | ..label:read
+17:19:41.271195 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001077 |  0.000050 | index        | ..read/version:2
+17:19:41.271198 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001080 |  0.000053 | index        | ..read/cache_nr:133
+17:19:41.271202 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001084 |  0.000057 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-6/index
+17:19:41.271243 git.c:789                    | d0 | main                     | exit         |     |  0.001125 |           |              | code:0
+17:19:41.271247 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001129 |           |              | code:0
+17:19:41.366800 common-init.c:77             | d0 | main                     | version      |     |           |           |              | 2.56.0
+17:19:41.367009 common-init.c:78             | d0 | main                     | start        |     |  0.000632 |           |              | git ls-files -z
+17:19:41.367060 compat/darwin/procinfo.c:81  | d0 | main                     | cmd_ancestry |     |           |           |              | ancestry:[Python Python codex ChatGPT launchd]
+17:19:41.367264 repository.c:256             | d0 | main                     | def_repo     | r1  |           |           |              | worktree:${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/agent-7
+17:19:41.367343 git.c:507                    | d0 | main                     | cmd_name     |     |           |           |              | ls-files (ls-files)
+17:19:41.367394 read-cache.c:2375            | d0 | main                     | region_enter | r1  |  0.001023 |           | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-7/index
+17:19:41.367423 cache-tree.c:726             | d0 | main                     | region_enter | r1  |  0.001052 |           | cache_tree   | ..label:read
+17:19:41.367434 cache-tree.c:728             | d0 | main                     | region_leave | r1  |  0.001063 |  0.000011 | cache_tree   | ..label:read
+17:19:41.367440 read-cache.c:2328            | d0 | main                     | data         | r1  |  0.001070 |  0.000047 | index        | ..read/version:2
+17:19:41.367444 read-cache.c:2330            | d0 | main                     | data         | r1  |  0.001074 |  0.000051 | index        | ..read/cache_nr:133
+17:19:41.367447 read-cache.c:2380            | d0 | main                     | region_leave | r1  |  0.001077 |  0.000054 | index        | label:do_read_index ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01/paired-restore-large-1rfb0180/repo/.git/worktrees/agent-7/index
+17:19:41.367489 git.c:789                    | d0 | main                     | exit         |     |  0.001119 |           |              | code:0
+17:19:41.367493 trace2/tr2_tgt_perf.c:219    | d0 | main                     | atexit       |     |  0.001123 |           |              | code:0
+paired restore large 0 pass []
+Report: ${WORKSPACE}/benchmark-results/checkout-latency-n55h9u01

@@ -1,0 +1,876 @@
+    GEN version-def.h
+    GEN git-difftool--helper
+    GEN git-filter-branch
+    GEN git-merge-octopus
+    GEN git-mergetool
+    GEN git-merge-resolve
+    GEN git-merge-one-file
+    GEN git-quiltimport
+    GEN git-request-pull
+    GEN git-submodule
+    GEN git-web--browse
+    GEN git-archimport
+    GEN git-cvsexportcommit
+    GEN git-cvsimport
+    GEN git-cvsserver
+    GEN git-send-email
+    GEN git-svn
+    GEN git-p4
+    GEN git-mergetool--lib
+    GEN git-instaweb
+    GEN git-sh-i18n
+    GEN git-sh-setup
+    GEN perl/build/lib/Git.pm
+    GEN perl/build/lib/Git/I18N.pm
+    GEN perl/build/lib/Git/IndexInfo.pm
+    GEN perl/build/lib/Git/LoadCPAN.pm
+    GEN perl/build/lib/Git/Packet.pm
+    GEN perl/build/lib/Git/SVN.pm
+    GEN perl/build/lib/Git/LoadCPAN/Error.pm
+    GEN perl/build/lib/Git/SVN/Editor.pm
+    GEN perl/build/lib/Git/SVN/Fetcher.pm
+    GEN perl/build/lib/Git/SVN/GlobSpec.pm
+    GEN perl/build/lib/Git/SVN/Log.pm
+    GEN perl/build/lib/Git/SVN/Prompt.pm
+    GEN perl/build/lib/Git/SVN/Migration.pm
+    GEN perl/build/lib/Git/SVN/Ra.pm
+    GEN perl/build/lib/Git/SVN/Utils.pm
+    GEN perl/build/lib/Git/SVN/Memoize/YAML.pm
+    GEN perl/build/lib/Git/LoadCPAN/Mail/Address.pm
+    GEN perl/build/lib/FromCPAN/Error.pm
+    GEN perl/build/lib/FromCPAN/Mail/Address.pm
+    SUBDIR templates
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -C t/ all
+rm -f -r 'test-results'
+GIT_TEST_EXT_CHAIN_LINT=0 && export GIT_TEST_EXT_CHAIN_LINT && /Applications/Xcode.app/Contents/Developer/usr/bin/make aggregate-results-and-cleanup
+*** t0012-help.sh ***
+*** t0020-crlf.sh ***
+*** t0003-attributes.sh ***
+*** t0025-crlf-renormalize.sh ***
+ok 1 - setup
+ok 1 - open-quoted pathname
+ok 2 - setup
+ok 1 - setup
+ok 2 - basic help commands
+ok 2 - renormalize CRLF in repo
+ok 1 - setup
+ok 3 - setup branches
+ok 3 - ignore-errors not mistaken for renormalize
+ok 3 - invalid usage
+# passed all 3 test(s)
+1..3
+*** t2004-checkout-cache-temp.sh ***
+ok 2 - safecrlf: autocrlf=input, all CRLF
+ok 4 - invalid usage of '-a' with [-i|-m|-w]
+ok 3 - safecrlf: autocrlf=input, mixed LF/CRLF
+ok 4 - safecrlf: autocrlf=true, all LF
+ok 5 - invalid usage of '-g' with [-i|-m|-w]
+ok 4 - command line checks
+ok 6 - invalid usage of '-g' with --no-external-commands
+ok 7 - invalid usage of '-g' with --no-aliases
+ok 5 - safecrlf: autocrlf=true mixed LF/CRLF
+ok 8 - invalid usage of '-c' with [-i|-m|-w]
+ok 9 - invalid usage of '-c' with --no-external-commands
+ok 10 - invalid usage of '-c' with --no-aliases
+ok 11 - invalid usage of '--config-for-completion' with [-i|-m|-w]
+ok 12 - invalid usage of '--config-for-completion' with --no-external-commands
+ok 6 - safecrlf: print warning only once
+ok 13 - invalid usage of '--config-for-completion' with --no-aliases
+ok 7 - safecrlf: git diff demotes safecrlf=true to warn
+ok 14 - invalid usage of '--config-sections-for-completion' with [-i|-m|-w]
+ok 15 - invalid usage of '--config-sections-for-completion' with --no-external-commands
+ok 16 - invalid usage of '--config-sections-for-completion' with --no-aliases
+ok 8 - safecrlf: no warning with safecrlf=false
+ok 1 - setup
+ok 9 - switch off autocrlf, safecrlf, reset HEAD
+ok 2 - checkout one stage 0 to temporary file
+ok 5 - attribute test
+ok 10 - update with autocrlf=input
+ok 3 - checkout all stage 0 to temporary files
+ok 4 - setup 3-way merge
+ok 11 - update with autocrlf=true
+ok 5 - checkout one stage 2 to temporary file
+ok 6 - checkout all stage 2 to temporary files
+ok 12 - checkout with autocrlf=true
+ok 7 - checkout all stages of unknown path
+ok 6 - attribute matching is case sensitive when core.ignorecase=0
+ok 8 - checkout all stages/one file to nothing
+ok 17 - works for commands and guides by default
+ok 9 - checkout all stages/one file to temporary files
+ok 18 - --exclude-guides does not work for guides
+ok 10 - --stage=all implies --temp
+ok 13 - checkout with autocrlf=input
+ok 11 - overriding --stage=all resets implied --temp
+ok 19 - --help does not work for guides
+ok 12 - --stage=all --no-temp is rejected
+ok 14 - apply patch (autocrlf=input)
+ok 20 - git help
+ok 21 - git help -g
+ok 13 - checkout some stages/one file to temporary files
+ok 14 - checkout all stages/all files to temporary files
+ok 15 - -- path0: no entry
+ok 15 - apply patch --cached (autocrlf=input)
+ok 16 - -- path1: all 3 stages
+ok 7 - attribute matching is case insensitive when core.ignorecase=1
+ok 17 - -- path2: no stage 1, have stage 2 and 3
+ok 18 - -- path3: no stage 2, have stage 1 and 3
+ok 16 - apply patch --index (autocrlf=input)
+ok 22 - git help fails for non-existing html pages
+ok 19 - -- path4: no stage 3, have stage 1 and 3
+ok 20 - -- asubdir/path5: no stage 2 and 3 have stage 1
+ok 17 - apply patch (autocrlf=true)
+ok 21 - checkout --temp within subdir
+ok 8 - additional case insensitivity tests
+ok 18 - apply patch --cached (autocrlf=true)
+ok 22 - checkout --temp symlink
+ok 9 - unnormalized paths
+ok 23 - emit well-formed relative path
+# passed all 23 test(s)
+1..23
+ok 19 - apply patch --index (autocrlf=true)
+*** t2005-checkout-index-symlinks.sh ***
+ok 23 - git help succeeds without git.html
+ok 20 - .gitattributes says two is binary
+ok 24 - git help --user-interfaces
+ok 21 - .gitattributes says two is input
+ok 25 - git help -c
+ok 10 - relative paths
+ok 22 - .gitattributes says two and three are text
+ok 26 - git help --config-for-completion
+ok 11 - prefixes are not confused with leading directories
+ok 27 - git help --config-sections-for-completion
+ok 23 - in-tree .gitattributes (1)
+ok 28 - 'git' section spacing
+ok 24 - in-tree .gitattributes (2)
+ok 12 - core.attributesfile
+ok 29 - 'git help' section spacing
+ok 13 - attribute test: read paths from stdin
+ok 1 - preparation
+ok 30 - 'git help -a' section spacing
+ok 14 - setup --all option
+ok 25 - in-tree .gitattributes (3)
+ok 2 - the checked-out symlink must be a file
+ok 15 - attribute test: --all option
+ok 3 - the file must be the blob we added during the setup
+ok 31 - 'git help -g' section spacing
+# passed all 3 test(s)
+1..3
+*** t2007-checkout-symlink.sh ***
+ok 32 - generate builtin list
+ok 26 - in-tree .gitattributes (4)
+ok 16 - attribute test: --cached option
+ok 33 - add can handle -h
+ok 34 - am can handle -h
+ok 17 - root subdir attribute test
+ok 35 - annotate can handle -h
+ok 18 - negative patterns
+ok 36 - apfs can handle -h
+ok 19 - patterns starting with exclamation
+ok 37 - apply can handle -h
+ok 38 - archive can handle -h
+ok 20 - "**" test
+ok 39 - backfill can handle -h
+ok 40 - bisect can handle -h
+ok 27 - checkout with existing .gitattributes
+ok 41 - blame can handle -h
+ok 42 - branch can handle -h
+ok 43 - bugreport can handle -h
+ok 44 - bundle can handle -h
+ok 21 - "**" with no slashes test
+ok 45 - cat-file can handle -h
+ok 28 - checkout when deleting .gitattributes
+ok 29 - invalid .gitattributes (must not crash)
+ok 46 - check-attr can handle -h
+ok 22 - using --git-dir and --work-tree
+ok 47 - check-ignore can handle -h
+ok 48 - check-mailmap can handle -h
+ok 49 - check-ref-format can handle -h
+ok 50 - checkout can handle -h
+ok 30 - setting up for new autocrlf tests
+ok 51 - checkout--worker can handle -h
+ok 52 - checkout-index can handle -h
+ok 31 - report no change after setting autocrlf
+ok 1 - setup
+ok 53 - cherry can handle -h
+ok 2 - switch from symlink to dir
+ok 54 - cherry-pick can handle -h
+ok 32 - files are clean after checkout
+ok 33 - LF only file gets CRLF with autocrlf
+ok 55 - clean can handle -h
+ok 3 - Remove temporary directories & switch to main
+ok 34 - Mixed file is still mixed with autocrlf
+ok 35 - CRLF only file has CRLF with autocrlf
+ok 56 - clone can handle -h
+ok 4 - switch from dir to symlink
+# passed all 4 test(s)
+1..4
+ok 57 - column can handle -h
+*** t2009-checkout-statinfo.sh ***
+ok 58 - commit can handle -h
+ok 59 - commit-graph can handle -h
+ok 60 - commit-tree can handle -h
+ok 36 - New CRLF file gets LF in repo
+# passed all 36 test(s)
+1..36
+ok 61 - config can handle -h
+*** t2021-checkout-overwrite.sh ***
+ok 62 - count-objects can handle -h
+ok 63 - credential can handle -h
+ok 64 - credential-cache can handle -h
+ok 65 - credential-cache--daemon can handle -h
+ok 66 - credential-store can handle -h
+ok 67 - describe can handle -h
+ok 68 - diagnose can handle -h
+ok 69 - diff can handle -h
+ok 70 - diff-files can handle -h
+ok 23 - using --source
+ok 71 - diff-index can handle -h
+ok 72 - diff-pairs can handle -h
+ok 24 - setup bare
+ok 73 - diff-tree can handle -h
+ok 74 - difftool can handle -h
+ok 1 - setup
+ok 75 - fast-export can handle -h
+ok 76 - fast-import can handle -h
+ok 1 - setup
+ok 77 - fetch can handle -h
+ok 25 - bare repository: check that .gitattribute is ignored
+ok 78 - fetch-pack can handle -h
+ok 79 - fmt-merge-msg can handle -h
+ok 26 - --attr-source is bad
+ok 2 - create a commit where dir a/b changed to file
+ok 80 - for-each-ref can handle -h
+ok 2 - branch switching
+ok 81 - for-each-repo can handle -h
+ok 27 - attr.tree when HEAD is unborn
+ok 82 - format-patch can handle -h
+ok 3 - checkout commit with dir must not remove untracked a/b
+ok 83 - format-rev can handle -h
+ok 84 - fsck can handle -h
+ok 28 - bad attr source defaults to reading .gitattributes file
+ok 85 - fsck-objects can handle -h
+ok 86 - fsmonitor--daemon can handle -h
+ok 3 - path checkout
+# passed all 3 test(s)
+1..3
+ok 87 - gc can handle -h
+ok 4 - create a commit where dir a/b changed to symlink
+ok 88 - get-tar-commit-id can handle -h
+*** t2022-checkout-paths.sh ***
+ok 89 - grep can handle -h
+ok 90 - hash-object can handle -h
+ok 5 - checkout commit with dir must not remove untracked a/b
+ok 91 - help can handle -h
+ok 6 - the symlink remained
+ok 7 - cleanup after previous symlink tests
+ok 92 - history can handle -h
+ok 93 - hook can handle -h
+ok 29 - bare repo no longer defaults to reading .gitattributes from HEAD
+ok 94 - index-pack can handle -h
+ok 95 - init can handle -h
+ok 8 - checkout -f must not follow symlinks when removing entries
+ok 96 - init-db can handle -h
+ok 97 - interpret-trailers can handle -h
+ok 98 - last-modified can handle -h
+ok 99 - log can handle -h
+ok 100 - ls-files can handle -h
+ok 101 - ls-remote can handle -h
+ok 9 - checkout --overwrite-ignore should succeed if only ignored files in the way
+ok 102 - ls-tree can handle -h
+# passed all 9 test(s)
+1..9
+*** t2026-checkout-pathspec-file.sh ***
+ok 103 - mailinfo can handle -h
+ok 104 - mailsplit can handle -h
+ok 105 - maintenance can handle -h
+ok 30 - precedence of --attr-source, GIT_ATTR_SOURCE, then attr.tree
+ok 1 - setup
+ok 106 - merge can handle -h
+ok 107 - merge-base can handle -h
+ok 31 - diff without repository with attr source
+ok 108 - merge-file can handle -h
+ok 109 - merge-index can handle -h
+ok 110 - merge-ours can handle -h
+ok 111 - merge-recursive can handle -h
+ok 2 - checking out paths out of a tree does not clobber unrelated paths
+ok 112 - merge-recursive-ours can handle -h
+ok 113 - merge-recursive-theirs can handle -h
+ok 114 - merge-subtree can handle -h
+ok 115 - merge-tree can handle -h
+ok 116 - mktag can handle -h
+ok 117 - mktree can handle -h
+ok 3 - do not touch unmerged entries matching $path but not in $tree
+ok 118 - multi-pack-index can handle -h
+ok 119 - mv can handle -h
+ok 120 - name-rev can handle -h
+ok 121 - notes can handle -h
+ok 122 - pack-objects can handle -h
+ok 123 - pack-redundant can handle -h
+ok 124 - pack-refs can handle -h
+ok 4 - do not touch files that are already up-to-date
+ok 125 - patch-id can handle -h
+ok 1 - setup
+ok 126 - pickaxe can handle -h
+ok 127 - prune can handle -h
+ok 128 - prune-packed can handle -h
+ok 129 - pull can handle -h
+ok 2 - --pathspec-from-file from stdin
+ok 130 - push can handle -h
+ok 32 - bare repository: with --source
+ok 5 - checkout HEAD adds deleted intent-to-add file back to index
+ok 131 - range-diff can handle -h
+ok 33 - bare repository: check that --cached honors index
+# passed all 5 test(s)
+1..5
+ok 132 - read-tree can handle -h
+ok 3 - --pathspec-from-file from file
+*** t2070-restore.sh ***
+ok 133 - rebase can handle -h
+ok 134 - receive-pack can handle -h
+ok 135 - reflog can handle -h
+ok 4 - NUL delimiters
+ok 34 - bare repository: test info/attributes
+ok 136 - refs can handle -h
+ok 137 - remote can handle -h
+ok 35 - binary macro expanded by -a
+ok 138 - remote-ext can handle -h
+ok 5 - LF delimiters
+ok 36 - query binary macro directly
+ok 139 - remote-fd can handle -h
+ok 37 - set up symlink tests
+ok 140 - repack can handle -h
+ok 141 - replace can handle -h
+ok 6 - no trailing delimiter
+ok 142 - replay can handle -h
+ok 38 - symlinks respected in core.attributesFile
+ok 143 - repo can handle -h
+ok 39 - symlinks respected in info/attributes
+ok 144 - rerere can handle -h
+ok 7 - CRLF delimiters
+ok 145 - reset can handle -h
+ok 40 - symlinks not respected in-tree
+ok 146 - restore can handle -h
+ok 41 - large attributes line ignored in tree
+ok 8 - quotes
+ok 147 - rev-list can handle -h
+ok 148 - rev-parse can handle -h
+ok 42 - large attributes line ignores trailing content in tree
+ok 9 - quotes not compatible with --pathspec-file-nul
+ok 149 - revert can handle -h
+ok 43 # skip large attributes file ignored in tree (missing EXPENSIVE)
+ok 150 - rm can handle -h
+ok 151 - send-pack can handle -h
+ok 10 - only touches what was listed
+ok 1 - setup
+ok 152 - shortlog can handle -h
+ok 2 - restore without pathspec is not ok
+ok 44 - large attributes line ignored in index
+ok 153 - show can handle -h
+ok 3 - restore a file, ignoring branch of same name
+ok 154 - show-branch can handle -h
+ok 155 - show-index can handle -h
+ok 45 - large attributes line ignores trailing content in index
+ok 156 - show-ref can handle -h
+ok 46 # skip large attributes file ignored in index (missing EXPENSIVE)
+ok 11 - error conditions
+ok 47 # skip large attributes blob ignored (missing EXPENSIVE)
+# passed all 11 test(s)
+1..11
+ok 157 - sparse-checkout can handle -h
+*** t2071-restore-patch.sh ***
+ok 158 - stage can handle -h
+ok 4 - restore a file on worktree from another ref
+ok 48 - builtin object mode attributes work (dir and regular paths)
+ok 159 - stash can handle -h
+ok 49 - builtin object mode attributes work (executable)
+ok 160 - status can handle -h
+ok 161 - stripspace can handle -h
+ok 50 - builtin object mode attributes work (symlinks)
+ok 162 - submodule--helper can handle -h
+ok 5 - restore a file in the index from another ref
+ok 163 - switch can handle -h
+ok 164 - symbolic-ref can handle -h
+ok 165 - tag can handle -h
+ok 166 - unpack-file can handle -h
+ok 6 - restore a file in both the index and worktree from another ref
+ok 51 - native object mode attributes work with --cached
+ok 167 - unpack-objects can handle -h
+ok 168 - update-index can handle -h
+ok 169 - update-ref can handle -h
+ok 170 - update-server-info can handle -h
+ok 7 - restore --staged uses HEAD as source
+ok 171 - upload-archive can handle -h
+ok 172 - upload-archive--writer can handle -h
+ok 173 - upload-pack can handle -h
+ok 174 - url-parse can handle -h
+ok 8 - restore --worktree --staged uses HEAD as source
+ok 52 - check object mode attributes work for submodules
+ok 175 - var can handle -h
+ok 176 - verify-commit can handle -h
+ok 53 - we do not allow user defined builtin_* attributes
+ok 1 - setup
+ok 177 - verify-pack can handle -h
+ok 2 - restore -p without pathspec is fine
+ok 178 - verify-tag can handle -h
+ok 54 - user defined builtin_objectmode values are ignored
+ok 179 - version can handle -h
+ok 180 - whatchanged can handle -h
+ok 181 - worktree can handle -h
+ok 182 - write-tree can handle -h
+# passed all 182 test(s)
+1..182
+*** t2072-restore-pathspec-file.sh ***
+ok 3 - saying "n" does nothing
+ok 55 - deep macro recursion
+# passed all 55 test(s)
+1..55
+ok 9 - restore --ignore-unmerged ignores unmerged entries
+*** t2080-parallel-checkout-basics.sh ***
+ok 4 - git restore -p
+ok 10 - restore --staged adds deleted intent-to-add file back to index
+ok 5 - git restore -p with staged changes
+ok 11 - restore --staged invalidates cache tree for deletions
+ok 6 - git restore -p --source=HEAD
+ok 1 - setup
+ok 12 - restore --merge to unresolve
+ok 2 - --pathspec-from-file from stdin
+ok 7 - git restore -p --source=@
+ok 3 - --pathspec-from-file from file
+ok 13 - restore --merge to unresolve after (mistaken) resolution
+ok 4 - NUL delimiters
+ok 8 - git restore -p --source=HEAD^
+ok 14 - restore --merge to unresolve after (mistaken) resolution
+ok 5 - LF delimiters
+ok 6 - no trailing delimiter
+ok 9 - git restore -p --source=HEAD^...
+ok 7 - CRLF delimiters
+ok 15 - restore with merge options are incompatible with certain options
+ok 10 - git restore -p handles deletion
+# passed all 15 test(s)
+1..15
+ok 8 - quotes
+*** t2081-parallel-checkout-collisions.sh ***
+ok 9 - quotes not compatible with --pathspec-file-nul
+ok 11 - path limiting works: dir
+ok 10 - only touches what was listed
+ok 12 - path limiting works: -- dir
+ok 11 - error conditions
+ok 12 - wildcard pathspec matches file in subdirectory
+# passed all 12 test(s)
+1..12
+*** t2082-parallel-checkout-attributes.sh ***
+ok 13 - path limiting works: HEAD^ -- dir
+ok 1 - setup
+ok 2 - worker detects basename collision
+ok 14 - path limiting works: foo inside dir
+ok 15 - none of this moved HEAD
+# passed all 15 test(s)
+1..15
+*** t2090-apfs-checkout.sh ***
+ok 3 - worker detects dirname collision
+ok 4 - do not follow symlinks colliding with leading dir
+ok 1 - parallel-checkout with ident
+ok 5 - collision report on clone (w/ racy file creation)
+ok 1 - setup a registered donor and target
+ok 2 - parallel-checkout with re-encoding
+ok 2 - path restore preserves staging and untracked files
+ok 3 - dirty donor bytes are rejected
+ok 6 - collision report on clone (w/ colliding peer after the detected entry)
+# passed all 6 test(s)
+1..6
+ok 4 - same-sized blob replacements retain native semantics
+*** t2200-add-update.sh ***
+ok 3 - parallel-checkout with eol conversions
+ok 5 - large restore uses bounded native clone batches
+ok 6 - batch rejects dirty donors without changing them
+ok 1 - setup
+ok 2 - update
+ok 4 - parallel-checkout and external filter
+ok 3 - update noticed a removal
+ok 4 - update touched correct path
+ok 5 - update did not touch other tracked files
+ok 6 - update did not touch untracked files
+ok 7 - explicit serial setting overrides automatic batches
+ok 7 - error out when passing untracked path
+ok 8 - disabled feature uses ordinary writes
+# passed all 8 test(s)
+1..8
+ok 8 - cache tree has not been corrupted
+ok 9 - update from a subdirectory
+ok 10 - change gets noticed
+*** t2201-add-update-typechange.sh ***
+ok 11 - non-qualified update in subdir updates from the root
+ok 1 - setup repo for checkout with various types of changes
+ok 12 - replace a file with a symlink
+ok 13 - add everything changed
+ok 14 - touch and then add -u
+ok 15 - touch and then add explicitly
+ok 16 - add -n -u should not add but just report
+ok 5 - parallel-checkout and delayed checkout
+# passed all 5 test(s)
+1..5
+*** t2203-add-intent.sh ***
+ok 1 - setup
+ok 17 - add -u resolves unmerged paths
+ok 2 - modify
+ok 3 - diff-files
+ok 4 - diff-index
+ok 5 - add -u
+ok 1 - intent to add
+ok 18 - add -u avoids rename pairing on unmerged paths
+ok 2 - git status
+ok 6 - commit -a
+# passed all 6 test(s)
+1..6
+ok 19 - "add -u non-existent" should fail
+*** t7500-commit-template-squash-signoff.sh ***
+ok 3 - git status with porcelain v2
+ok 4 - check result of "add -N"
+ok 5 - intent to add is just an ordinary empty blob
+ok 6 - intent to add does not clobber existing paths
+ok 20 - "commit -a" implies "add -u" if index becomes empty
+# passed all 20 test(s)
+1..20
+*** t2400-worktree-add.sh ***
+ok 7 - i-t-a entry is simply ignored
+ok 1 - a basic commit in an empty tree should succeed
+ok 2 - sequential checkout
+ok 8 - can commit with an unrelated i-t-a entry in index
+ok 2 - nonexistent template file should return error
+ok 3 - nonexistent optional template file on command line
+ok 9 - can "commit -a" with an i-t-a entry
+ok 4 - nonexistent template file in config should return error
+ok 1 - setup
+ok 2 - "add" an existing worktree
+ok 3 - "add" an existing empty worktree
+ok 4 - "add" using shorthand - fails when no previous branch
+ok 10 - cache-tree invalidates i-t-a paths
+ok 5 - nonexistent optional template file in config
+ok 6 - unedited template should not commit
+ok 7 - unedited template with comments should not commit
+ok 8 - a Signed-off-by line by itself should not commit
+ok 11 - cache-tree does not ignore dir that has i-t-a entries
+ok 5 - "add" using - shorthand
+ok 9 - adding comments to a template should not commit
+ok 6 - "add" refuses to checkout locked branch
+ok 7 - "add" rejects an empty path
+ok 8 - checking out paths not complaining about linked checkouts
+ok 12 - cache-tree does skip dir that becomes empty
+ok 10 - adding real content to a template should commit
+ok 13 - commit: ita entries ignored in empty initial commit check
+ok 11 - existent template marked optional should commit
+ok 9 - "add" worktree
+ok 12 - -t option should be short for --template
+ok 10 - "add" worktree with lock
+ok 14 - commit: ita entries ignored in empty commit check
+ok 11 - "add" worktree with lock and reason
+ok 12 - "add" worktree with reason but no lock
+ok 13 - "add" worktree from a subdir
+ok 13 - config-specified template should commit
+ok 14 - "add" from a linked checkout
+ok 14 - explicit commit message should override template
+ok 15 - rename detection finds the right names
+ok 15 - commit message from file should override template
+ok 15 - "add" worktree creating new branch
+ok 16 - die the same branch is already checked out
+ok 16 - commit message from template with whitespace issue
+ok 16 - double rename detection in status
+ok 17 - using alternate GIT_INDEX_FILE (1)
+ok 17 - refuse to reset a branch in use elsewhere
+ok 18 - using alternate GIT_INDEX_FILE (2)
+ok 18 - die the same branch is already checked out (symlink)
+ok 3 - parallel checkout
+ok 19 - --signoff
+ok 19 - not die the same branch is already checked out
+ok 17 - i-t-a files shown as new for "diff", "diff-files"; not-new for "diff --cached"
+ok 20 - not die on re-checking out current branch
+ok 20 - commit message from file (1)
+ok 21 - commit message from file (2)
+ok 18 - "diff HEAD" includes ita as new files
+ok 21 - "add" from a bare repo
+ok 22 - commit message from stdin
+ok 22 - checkout from a bare repo without "add"
+ok 23 - commit -F overrides -t
+ok 19 - apply --intent-to-add
+# passed all 19 test(s)
+1..19
+ok 23 - "add" default branch of a bare repo
+ok 24 - Commit without message is allowed with --allow-empty-message
+ok 25 - Commit without message is no-no without --allow-empty-message
+ok 26 - Commit a message with --allow-empty-message
+ok 27 - commit -C empty respects --allow-empty-message
+ok 24 - "add" to bare repo with worktree config
+ok 28 - commit --fixup provides correct one-line commit message
+ok 29 - commit --fixup -m"something" -m"extra"
+ok 25 - checkout with grafts
+ok 30 - commit --fixup --edit
+ok 4 - sequential-fallback checkout
+ok 26 - "add" from relative HEAD
+ok 31 - commit --fixup=amend: creates amend! commit
+ok 27 - "add -b" with <branch> omitted
+ok 28 - "add --detach" with <branch> omitted
+ok 29 - "add" with <branch> omitted
+ok 30 - "add" with trailing slash and <branch> omitted
+ok 32 - --fixup=amend: --only ignores staged changes
+ok 31 - "add" checks out existing branch of dwimd name
+ok 32 - "add <path>" dwim fails with checked out branch
+ok 33 - "add --force" with existing dwimd name doesnt die
+ok 34 - "add" no auto-vivify with --detach and <branch> omitted
+ok 35 - 'worktree add' with '-b poodle -B poodle bamboo main' has mutually exclusive options
+ok 36 - 'worktree add' with '-b poodle --detach bamboo main' has mutually exclusive options
+ok 37 - 'worktree add' with '-B poodle --detach bamboo main' has mutually exclusive options
+ok 38 - 'worktree add' with '--orphan --detach bamboo' has mutually exclusive options
+ok 33 - --fixup=reword: ignores staged changes
+ok 39 - 'worktree add' with '--orphan --no-checkout bamboo' has mutually exclusive options
+ok 40 - 'worktree add' with '--orphan bamboo main' has mutually exclusive options
+ok 41 - 'worktree add' with '--orphan -b bamboo wtdir/ main' has mutually exclusive options
+ok 5 - parallel checkout on clone
+ok 42 - "add -B" fails if the branch is checked out
+ok 34 - --fixup=reword: error out with -m option
+ok 43 - add -B
+ok 35 - --fixup=amend: error out with -m option
+ok 44 - add --quiet
+ok 45 - add --quiet -b
+ok 46 - "add --orphan"
+ok 36 - consecutive amend! commits remove amend! line from commit msg body
+ok 47 - "add --orphan (no -b)"
+ok 48 - "add --orphan with trailing slash (no -b)"
+ok 37 - deny to create amend! commit if its commit msg body is empty
+ok 49 - "add --orphan --quiet"
+ok 50 - "add --orphan" fails if the branch already exists
+ok 6 - sequential-fallback checkout on clone
+ok 38 - amend! commit allows empty commit msg body with --allow-empty-message
+ok 39 - --fixup=reword: incompatible with --all
+ok 40 - --fixup=reword: incompatible with --include
+ok 51 - "add --orphan" with empty repository
+ok 41 - --fixup=reword: incompatible with --only
+ok 42 - --fixup=reword: incompatible with --interactive
+ok 43 - --fixup=reword: incompatible with --patch
+ok 52 - "add" worktree with orphan branch and lock
+ok 53 - "add" worktree with orphan branch, lock, and reason
+ok 7 - compare the working trees
+ok 44 - --fixup=reword: give error with pathsec
+ok 45 - --fixup=reword: -F give error message
+ok 54 - 'worktree add' show orphan hint in bad/orphan HEAD w/ no opts
+ok 46 - commit --squash works with -F
+ok 55 - 'worktree add' show orphan hint in bad/orphan HEAD w/ -b
+ok 47 - commit --squash works with -m
+ok 56 - 'worktree add' show orphan hint in bad/orphan HEAD w/ -B
+ok 57 - 'worktree add' doesn't show orphan hint in bad/orphan HEAD w/ --quiet
+ok 8 - submodules can use parallel checkout
+ok 48 - commit --squash works with -C
+ok 58 - local clone from linked checkout
+ok 59 - local clone --shared from linked checkout
+ok 49 - commit --squash works with -c
+ok 60 - "add" worktree with --no-checkout
+ok 9 - parallel checkout respects --[no]-force
+ok 61 - "add" worktree with --checkout
+ok 50 - commit --squash works with -C for same commit
+ok 62 - put a worktree under rebase
+ok 63 - add a worktree, checking out a rebased branch
+ok 51 - commit --squash works with -c for same commit
+ok 10 - parallel checkout checks for symlinks in leading dirs
+ok 64 - checking out a rebased branch from another worktree
+ok 65 - not allow to delete a branch under rebase
+ok 66 - rename a branch under rebase not allowed
+ok 52 - commit --squash works with editor
+ok 67 - check out from current worktree branch ok
+ok 53 - invalid message options when using --fixup
+ok 54 - new line found before status message in commit template
+ok 68 - checkout a branch under bisect
+ok 69 - rename a branch under bisect not allowed
+ok 11 - "git checkout ." report should not include failed entries
+# passed all 11 test(s)
+1..11
+ok 55 - setup empty commit with unstaged rename and copy
+ok 56 - check commit with unstaged rename and copy
+ok 70 - --track sets up tracking
+ok 57 - commit without staging files fails and displays hints
+# passed all 57 test(s)
+1..57
+ok 71 - "add" <path> <remote/branch> w/ no HEAD
+ok 72 - --no-track avoids setting up tracking
+ok 73 - "add" <path> <non-existent-branch> fails
+ok 74 - "add" <path> <branch> dwims
+ok 75 - "add" <path> <branch> does not dwim with -b
+ok 76 - "add" <path> <branch> dwims with checkout.defaultRemote
+ok 77 - git worktree add does not match remote
+ok 78 - git worktree add --guess-remote sets up tracking
+ok 79 - git worktree add --guess-remote fails if there are multiple matches
+ok 80 - git worktree add --guess-remote sets up tracking (quiet)
+ok 81 - git worktree --no-guess-remote (quiet)
+ok 82 - git worktree add with worktree.guessRemote sets up tracking
+ok 83 - git worktree --no-guess-remote option overrides config
+ok 84 - "add" DWIM infer --orphan w/ empty repo, DWIM (no --branch), no --quiet (expect output), 'cd repo && git', no --branch
+ok 85 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd repo && git', no --branch, >=1 local branches, valid HEAD
+ok 86 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd repo && git', no --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 87 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd repo && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 88 - "add" error need fetch w/ DWIM (no --branch), no --quiet (expect output), 'cd repo && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 89 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd repo && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote, --force
+ok 90 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd repo && git', no --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 91 - "add" DWIM infer --orphan w/ empty repo, no --quiet (expect output), 'cd repo && git', --branch
+ok 92 - "add" DWIM doesnt infer --orphan w/ no --quiet (expect output), 'cd repo && git', --branch, >=1 local branches, valid HEAD
+ok 93 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'cd repo && git', --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 94 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'cd repo && git', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 95 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'cd repo && git', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 96 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'cd repo && git', --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 97 - "add" error, warn on bad HEAD, hint use orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd repo && git', no --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 98 - "add" error, warn on bad HEAD, hint use orphan w/ no --quiet (expect output), 'cd repo && git', --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 99 - "add" error, warn on bad HEAD, hint use orphan w/ no --quiet (expect output), 'cd repo && git', --detach, >=1 local branches, invalid (or orphan) HEAD
+ok 100 - "add" DWIM infer --orphan w/ empty repo, DWIM (no --branch), no --quiet (expect output), 'cd wt && git', no --branch
+ok 101 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd wt && git', no --branch, >=1 local branches, valid HEAD
+ok 102 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd wt && git', no --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 103 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd wt && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 104 - "add" error need fetch w/ DWIM (no --branch), no --quiet (expect output), 'cd wt && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 105 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd wt && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote, --force
+ok 106 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd wt && git', no --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 107 - "add" DWIM infer --orphan w/ empty repo, no --quiet (expect output), 'cd wt && git', --branch
+ok 108 - "add" DWIM doesnt infer --orphan w/ no --quiet (expect output), 'cd wt && git', --branch, >=1 local branches, valid HEAD
+ok 109 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'cd wt && git', --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 110 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'cd wt && git', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 111 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'cd wt && git', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 112 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'cd wt && git', --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 113 - "add" error, warn on bad HEAD, hint use orphan w/ DWIM (no --branch), no --quiet (expect output), 'cd wt && git', no --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 114 - "add" error, warn on bad HEAD, hint use orphan w/ no --quiet (expect output), 'cd wt && git', --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 115 - "add" error, warn on bad HEAD, hint use orphan w/ no --quiet (expect output), 'cd wt && git', --detach, >=1 local branches, invalid (or orphan) HEAD
+ok 116 - "add" DWIM infer --orphan w/ empty repo, DWIM (no --branch), no --quiet (expect output), 'git -C repo', no --branch
+ok 117 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C repo', no --branch, >=1 local branches, valid HEAD
+ok 118 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C repo', no --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 119 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C repo', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 120 - "add" error need fetch w/ DWIM (no --branch), no --quiet (expect output), 'git -C repo', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 121 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C repo', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote, --force
+ok 122 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C repo', no --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 123 - "add" DWIM infer --orphan w/ empty repo, no --quiet (expect output), 'git -C repo', --branch
+ok 124 - "add" DWIM doesnt infer --orphan w/ no --quiet (expect output), 'git -C repo', --branch, >=1 local branches, valid HEAD
+ok 125 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'git -C repo', --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 126 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'git -C repo', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 127 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'git -C repo', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 128 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'git -C repo', --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 129 - "add" error, warn on bad HEAD, hint use orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C repo', no --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 130 - "add" error, warn on bad HEAD, hint use orphan w/ no --quiet (expect output), 'git -C repo', --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 131 - "add" error, warn on bad HEAD, hint use orphan w/ no --quiet (expect output), 'git -C repo', --detach, >=1 local branches, invalid (or orphan) HEAD
+ok 132 - "add" DWIM infer --orphan w/ empty repo, DWIM (no --branch), no --quiet (expect output), 'git -C wt', no --branch
+ok 133 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C wt', no --branch, >=1 local branches, valid HEAD
+ok 134 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C wt', no --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 135 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C wt', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 136 - "add" error need fetch w/ DWIM (no --branch), no --quiet (expect output), 'git -C wt', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 137 - "add" DWIM infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C wt', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote, --force
+ok 138 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C wt', no --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 139 - "add" DWIM infer --orphan w/ empty repo, no --quiet (expect output), 'git -C wt', --branch
+ok 140 - "add" DWIM doesnt infer --orphan w/ no --quiet (expect output), 'git -C wt', --branch, >=1 local branches, valid HEAD
+ok 141 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'git -C wt', --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 142 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'git -C wt', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 143 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'git -C wt', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 144 - "add" DWIM infer --orphan w/ no --quiet (expect output), 'git -C wt', --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 145 - "add" error, warn on bad HEAD, hint use orphan w/ DWIM (no --branch), no --quiet (expect output), 'git -C wt', no --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 146 - "add" error, warn on bad HEAD, hint use orphan w/ no --quiet (expect output), 'git -C wt', --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 147 - "add" error, warn on bad HEAD, hint use orphan w/ no --quiet (expect output), 'git -C wt', --detach, >=1 local branches, invalid (or orphan) HEAD
+ok 148 - "add" error inferred "--orphan" gives illegal opts combo w/ empty repo, DWIM (no --branch), no --quiet (expect output), no --branch, --no-checkout
+ok 149 - "add" error inferred "--orphan" gives illegal opts combo w/ empty repo, DWIM (no --branch), no --quiet (expect output), no --branch, --track
+ok 150 - "add" error inferred "--orphan" gives illegal opts combo w/ empty repo, no --quiet (expect output), --branch, --no-checkout
+ok 151 - "add" error inferred "--orphan" gives illegal opts combo w/ empty repo, no --quiet (expect output), --branch, --track
+ok 152 - "add" DWIM infer --orphan w/ empty repo, DWIM (no --branch), --quiet, 'cd repo && git', no --branch
+ok 153 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), --quiet, 'cd repo && git', no --branch, >=1 local branches, valid HEAD
+ok 154 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'cd repo && git', no --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 155 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'cd repo && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 156 - "add" error need fetch w/ DWIM (no --branch), --quiet, 'cd repo && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 157 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'cd repo && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote, --force
+ok 158 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), --quiet, 'cd repo && git', no --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 159 - "add" DWIM infer --orphan w/ empty repo, --quiet, 'cd repo && git', --branch
+ok 160 - "add" DWIM doesnt infer --orphan w/ --quiet, 'cd repo && git', --branch, >=1 local branches, valid HEAD
+ok 161 - "add" DWIM infer --orphan w/ --quiet, 'cd repo && git', --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 162 - "add" DWIM infer --orphan w/ --quiet, 'cd repo && git', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 163 - "add" DWIM infer --orphan w/ --quiet, 'cd repo && git', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 164 - "add" DWIM infer --orphan w/ --quiet, 'cd repo && git', --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 165 - "add" error, warn on bad HEAD, hint use orphan w/ DWIM (no --branch), --quiet, 'cd repo && git', no --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 166 - "add" error, warn on bad HEAD, hint use orphan w/ --quiet, 'cd repo && git', --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 167 - "add" error, warn on bad HEAD, hint use orphan w/ --quiet, 'cd repo && git', --detach, >=1 local branches, invalid (or orphan) HEAD
+ok 168 - "add" DWIM infer --orphan w/ empty repo, DWIM (no --branch), --quiet, 'cd wt && git', no --branch
+ok 169 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), --quiet, 'cd wt && git', no --branch, >=1 local branches, valid HEAD
+ok 170 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'cd wt && git', no --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 171 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'cd wt && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 172 - "add" error need fetch w/ DWIM (no --branch), --quiet, 'cd wt && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 173 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'cd wt && git', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote, --force
+ok 174 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), --quiet, 'cd wt && git', no --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 175 - "add" DWIM infer --orphan w/ empty repo, --quiet, 'cd wt && git', --branch
+ok 176 - "add" DWIM doesnt infer --orphan w/ --quiet, 'cd wt && git', --branch, >=1 local branches, valid HEAD
+ok 177 - "add" DWIM infer --orphan w/ --quiet, 'cd wt && git', --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 178 - "add" DWIM infer --orphan w/ --quiet, 'cd wt && git', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 179 - "add" DWIM infer --orphan w/ --quiet, 'cd wt && git', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 180 - "add" DWIM infer --orphan w/ --quiet, 'cd wt && git', --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 181 - "add" error, warn on bad HEAD, hint use orphan w/ DWIM (no --branch), --quiet, 'cd wt && git', no --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 182 - "add" error, warn on bad HEAD, hint use orphan w/ --quiet, 'cd wt && git', --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 183 - "add" error, warn on bad HEAD, hint use orphan w/ --quiet, 'cd wt && git', --detach, >=1 local branches, invalid (or orphan) HEAD
+ok 184 - "add" DWIM infer --orphan w/ empty repo, DWIM (no --branch), --quiet, 'git -C repo', no --branch
+ok 185 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), --quiet, 'git -C repo', no --branch, >=1 local branches, valid HEAD
+ok 186 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'git -C repo', no --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 187 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'git -C repo', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 188 - "add" error need fetch w/ DWIM (no --branch), --quiet, 'git -C repo', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 189 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'git -C repo', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote, --force
+ok 190 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), --quiet, 'git -C repo', no --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 191 - "add" DWIM infer --orphan w/ empty repo, --quiet, 'git -C repo', --branch
+ok 192 - "add" DWIM doesnt infer --orphan w/ --quiet, 'git -C repo', --branch, >=1 local branches, valid HEAD
+ok 193 - "add" DWIM infer --orphan w/ --quiet, 'git -C repo', --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 194 - "add" DWIM infer --orphan w/ --quiet, 'git -C repo', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 195 - "add" DWIM infer --orphan w/ --quiet, 'git -C repo', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 196 - "add" DWIM infer --orphan w/ --quiet, 'git -C repo', --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 197 - "add" error, warn on bad HEAD, hint use orphan w/ DWIM (no --branch), --quiet, 'git -C repo', no --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 198 - "add" error, warn on bad HEAD, hint use orphan w/ --quiet, 'git -C repo', --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 199 - "add" error, warn on bad HEAD, hint use orphan w/ --quiet, 'git -C repo', --detach, >=1 local branches, invalid (or orphan) HEAD
+ok 200 - "add" DWIM infer --orphan w/ empty repo, DWIM (no --branch), --quiet, 'git -C wt', no --branch
+ok 201 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), --quiet, 'git -C wt', no --branch, >=1 local branches, valid HEAD
+ok 202 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'git -C wt', no --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 203 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'git -C wt', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 204 - "add" error need fetch w/ DWIM (no --branch), --quiet, 'git -C wt', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 205 - "add" DWIM infer --orphan w/ DWIM (no --branch), --quiet, 'git -C wt', no --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote, --force
+ok 206 - "add" DWIM doesnt infer --orphan w/ DWIM (no --branch), --quiet, 'git -C wt', no --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 207 - "add" DWIM infer --orphan w/ empty repo, --quiet, 'git -C wt', --branch
+ok 208 - "add" DWIM doesnt infer --orphan w/ --quiet, 'git -C wt', --branch, >=1 local branches, valid HEAD
+ok 209 - "add" DWIM infer --orphan w/ --quiet, 'git -C wt', --branch, 0 local branches, 0 remotes, 0 fetched remote branches, --no-guess-remote
+ok 210 - "add" DWIM infer --orphan w/ --quiet, 'git -C wt', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --no-guess-remote
+ok 211 - "add" DWIM infer --orphan w/ --quiet, 'git -C wt', --branch, 0 local branches, >=1 remotes, 0 fetched remote branches, --guess-remote
+ok 212 - "add" DWIM infer --orphan w/ --quiet, 'git -C wt', --branch, 0 local branches, >=1 remotes, >=1 fetched remote branches, --guess-remote
+ok 213 - "add" error, warn on bad HEAD, hint use orphan w/ DWIM (no --branch), --quiet, 'git -C wt', no --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 214 - "add" error, warn on bad HEAD, hint use orphan w/ --quiet, 'git -C wt', --branch, >=1 local branches, invalid (or orphan) HEAD
+ok 215 - "add" error, warn on bad HEAD, hint use orphan w/ --quiet, 'git -C wt', --detach, >=1 local branches, invalid (or orphan) HEAD
+ok 216 - "add" error inferred "--orphan" gives illegal opts combo w/ empty repo, DWIM (no --branch), --quiet, no --branch, --no-checkout
+ok 217 - "add" error inferred "--orphan" gives illegal opts combo w/ empty repo, DWIM (no --branch), --quiet, no --branch, --track
+ok 218 - "add" error inferred "--orphan" gives illegal opts combo w/ empty repo, --quiet, --branch, --no-checkout
+ok 219 - "add" error inferred "--orphan" gives illegal opts combo w/ empty repo, --quiet, --branch, --track
+ok 220 - "add" invokes post-checkout hook (branch)
+ok 221 - "add" invokes post-checkout hook (detached)
+ok 222 - "add --no-checkout" suppresses post-checkout hook
+ok 223 - "add" in other worktree invokes post-checkout hook
+ok 224 - "add" in bare repo invokes post-checkout hook
+ok 225 - "add" an existing but missing worktree
+ok 226 - "add" an existing locked but missing worktree
+ok 227 - "add" not tripped up by magic worktree matching"
+ok 228 - sanitize generated worktree name
+ok 229 - "add" should not fail because of another bad worktree
+ok 230 - "add" with uninitialized submodule, with submodule.recurse unset
+ok 231 - "add" with uninitialized submodule, with submodule.recurse set
+ok 232 - "add" with initialized submodule, with submodule.recurse unset
+ok 233 - "add" with initialized submodule, with submodule.recurse set
+ok 234 - can create worktrees with relative paths
+ok 235 - can create worktrees with absolute paths
+ok 236 - move repo without breaking relative internal links
+ok 237 - relative worktree sets extension config
+# passed all 237 test(s)
+1..237
+/Applications/Xcode.app/Contents/Developer/usr/bin/make aggregate-results
+
+missing prereq: EXPENSIVE
+
+fixed   0
+success 742
+failed  0
+broken  0
+total   745
+/Applications/Xcode.app/Contents/Developer/usr/bin/make clean
+rm -f -r 'chainlinttmp'
+rm -f -r 'greplinttmp'
+rm -f -r 'trash directory'.*
+rm -f -r valgrind/bin
+rm -f -r 'test-results'
+rm -f -r mesontmp
+rm -f .prove

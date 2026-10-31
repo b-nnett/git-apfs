@@ -57,6 +57,12 @@ Git. No global settings are changed. Diagnostics report clone coverage, fallback
 reasons, worker activity and cache accounting. Clone byte counts are logical
 contents; physical savings require an independent allocation measurement.
 
+**APFS + FSMonitor guard:** concurrent stress tests exposed missed external
+edits during APFS checkout workloads, including in equally tuned upstream Git.
+With APFS cloning or a positive `apfs.cacheLimit`, Git therefore bypasses FSMonitor and uses normal stat checks. Configuration is
+preserved and diagnostics report `cache.fsmonitor_stat_guard`. Untracked cache
+remains available. The FSEvents interaction is unresolved; the guard is deliberate.
+
 ## Optional donor cache
 
 The cache is **off by default**. It retains verified snapshots even after donor
@@ -74,12 +80,6 @@ writer locking and FIFO eviction. Its quota charges at least 4 KiB per entry or
 allocated file blocks, whichever is greater; directory/lock metadata is extra.
 This conservatively charges shared extents more than once. Cache warm-up costs
 and retained cache storage must be included when assessing benefit.
-
-**APFS + FSMonitor guard:** concurrent stress tests exposed missed external
-edits during APFS checkout workloads. With APFS cloning or a positive `apfs.cacheLimit`, Git
-therefore bypasses FSMonitor and uses normal stat checks. Configuration is
-preserved and diagnostics report `cache.fsmonitor_stat_guard`. Untracked cache
-remains available. The FSEvents interaction is unresolved; the guard is deliberate.
 
 ## Measurements and validation
 
