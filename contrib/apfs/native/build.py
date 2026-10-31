@@ -31,6 +31,8 @@ def main():
     if not upstream.exists():
         upstream.parent.mkdir(parents=True,exist_ok=True)
         run(['git','clone','--depth','1','--branch',meta['tag'],meta['repository'],upstream])
+    if subprocess.run(['git','-C',str(upstream),'cat-file','-e',meta['commit']+'^{commit}'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
+        run(['git','-C',str(upstream),'fetch','--depth=1','--no-tags','origin','tag',meta['tag']])
     commit=subprocess.check_output(['git','-C',str(upstream),'rev-parse',meta['commit']+'^{commit}'],text=True).strip()
     if commit!=meta['commit']:p.error('upstream revision mismatch')
     archive=subprocess.check_output(['git','-C',str(upstream),'archive',commit])

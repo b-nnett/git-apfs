@@ -535,13 +535,15 @@ static int add_worktree(const char *path, const char *refname,
 			  sb_git.buf);
 	junk_work_tree = xstrdup(path);
 
+	/* Publish the common-directory dependency before gitdir makes this
+	 * registration discoverable to concurrent worktree enumeration. */
+	strbuf_reset(&sb);
+	strbuf_addf(&sb, "%s/commondir", sb_repo.buf);
+	write_file(sb.buf, "../..");
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/gitdir", sb_repo.buf);
 	write_worktree_linking_files(the_repository, sb_git.buf,
 				     sb.buf, opts->relative_paths);
-	strbuf_reset(&sb);
-	strbuf_addf(&sb, "%s/commondir", sb_repo.buf);
-	write_file(sb.buf, "../..");
 
 	/*
 	 * Set up the ref store of the worktree and create the HEAD reference.

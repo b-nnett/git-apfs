@@ -194,6 +194,12 @@ static enum eol output_eol(enum convert_crlf_action crlf_action)
 	return core_eol;
 }
 
+int convert_attrs_preserve_bytes(const struct conv_attrs *ca)
+{
+	return ca && !ca->drv && !ca->ident && !ca->working_tree_encoding &&
+		output_eol(ca->crlf_action) != EOL_CRLF;
+}
+
 static void check_global_conv_flags_eol(const char *path,
 			    struct text_stat *old_stats, struct text_stat *new_stats,
 			    int conv_flags)

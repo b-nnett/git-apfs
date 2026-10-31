@@ -30,12 +30,21 @@ def run_git(binary,argv,cwd,env,timeout=120):
     matches=re.findall(r'git-apfs: attempted=(\d+) cloned=(\d+) bytes=(\d+)',result['stderr'])
     result['cloned_files']=sum(int(m[1]) for m in matches)
     result['cloned_logical_bytes']=sum(int(m[2]) for m in matches)
+    result['apfs_diagnostics']=[]
+    for line in result['stderr'].splitlines():
+        if line.startswith('{'):
+            try:
+                d=json.loads(line)
+                if d.get('event')=='git-apfs-checkout':result['apfs_diagnostics'].append(d)
+            except ValueError:pass
     return result
 
 
 def trial(root,variant,operation,files,size,args,container=None):
     baseline=args.baseline;candidate=args.candidate
-    env=bench.environment(root);env['PATH']=str(baseline.parent)+os.pathsep+env['PATH'];env['LC_ALL']='C'
+    env=bench.environment(root);env['GIT_APFS_TRACE_JSON']='1'
+    if args.profile:env.update(GIT_APFS_PROFILE='1',GIT_TRACE2_PERF='1')
+    env['PATH']=str(baseline.parent)+os.pathsep+env['PATH'];env['LC_ALL']='C'
     repo,_,_=bench.fixture(root,env,files,file_bytes=size)
     bench.git(repo,env,'config','gc.auto','0')
     rng=random.Random(123)
@@ -95,6 +104,7 @@ def trial(root,variant,operation,files,size,args,container=None):
         result['before_extra_bytes']=result['before']['allocated_bytes']-fixture
         result['after_extra_bytes']=result['after']['allocated_bytes']-fixture
         result['operation_delta_bytes']=result['after']['allocated_bytes']-result['before']['allocated_bytes']
+        if not all(result[k]['stable'] for k in ('fixture_allocation','before','after')):result['errors'].append('physical allocation did not stabilize')
     for i,dest in enumerate(targets):
         target_variant=target_variants[i]
         binary=baseline if target_variant=='native' else candidate
@@ -133,6 +143,7 @@ def main():
     p.add_argument('--paired',action='store_true',help='latency only: interleave native/APFS worktrees in one shared fixture')
     p.add_argument('--repeats',type=int,default=3)
     p.add_argument('--settle-seconds',type=float,default=0,help='untimed idle period before commands; 1.1 tests settled timestamp state')
+    p.add_argument('--profile',action='store_true',help='APFS phase work times and native Trace2 PERF; not a normal latency run')
     p.add_argument('--timeout',type=int,default=120)
     p.add_argument('--output',type=Path,default=ROOT/'benchmark-results')
     p.add_argument('--keep',action='store_true')

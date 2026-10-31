@@ -3,7 +3,12 @@ name: APFS checkout
 on:
   push:
     paths:
-      - 'apfs-checkout.*'
+      - 'apfs-*'
+      - 'fsmonitor-settings.c'
+      - 'builtin/apfs.c'
+      - 'builtin/worktree.c'
+      - 'read-cache.c'
+      - 'convert.*'
       - 'entry.c'
       - 'parallel-checkout.c'
       - 'contrib/apfs/**'
@@ -11,7 +16,12 @@ on:
       - '.github/workflows/apfs-checkout.yml'
   pull_request:
     paths:
-      - 'apfs-checkout.*'
+      - 'apfs-*'
+      - 'fsmonitor-settings.c'
+      - 'builtin/apfs.c'
+      - 'builtin/worktree.c'
+      - 'read-cache.c'
+      - 'convert.*'
       - 'entry.c'
       - 'parallel-checkout.c'
       - 'contrib/apfs/**'
@@ -66,4 +76,4 @@ jobs:
         shell: bash
         run: |
           source_dir=$(python3 -c 'import glob,json; p=glob.glob("contrib/apfs/benchmark-results/native-build-*/manifest.json")[0]; print(json.load(open(p))["builds"][1]["source"])')
-          GIT_CEILING_DIRECTORIES="$(dirname "$source_dir")" GIT_VERSION=2.50.1.apfs.2 GIT_BUILT_FROM_COMMIT=d82adb61ba2fd11d8f2587fca1b6bd7925ce4044 make -C "$source_dir" -j4 NO_GETTEXT=YesPlease NO_TCLTK=YesPlease prefix="$PWD/contrib/apfs/benchmark-results/git-apfs" test T='t2004-checkout-cache-temp.sh t2005-checkout-index-symlinks.sh t2007-checkout-symlink.sh t2009-checkout-statinfo.sh t2021-checkout-overwrite.sh t2022-checkout-paths.sh t2026-checkout-pathspec-file.sh t2070-restore.sh t2071-restore-patch.sh t2072-restore-pathspec-file.sh t2080-parallel-checkout-basics.sh t2081-parallel-checkout-collisions.sh t2082-parallel-checkout-attributes.sh t2090-apfs-checkout.sh t2400-worktree-add.sh'
+          GIT_CEILING_DIRECTORIES="$(dirname "$source_dir")" GIT_VERSION=2.56.0.apfs.3 GIT_BUILT_FROM_COMMIT=a018953688f1b10bddf91bff8747068f5f4746a4 make -C "$source_dir" -j4 NO_RUST=YesPlease NO_GETTEXT=YesPlease NO_TCLTK=YesPlease prefix="$PWD/contrib/apfs/benchmark-results/git-apfs" test T='t0012-help.sh t0003-attributes.sh t0020-crlf.sh t0025-crlf-renormalize.sh t2200-add-update.sh t2201-add-update-typechange.sh t2203-add-intent.sh t7500-commit-template-squash-signoff.sh t2004-checkout-cache-temp.sh t2005-checkout-index-symlinks.sh t2007-checkout-symlink.sh t2009-checkout-statinfo.sh t2021-checkout-overwrite.sh t2022-checkout-paths.sh t2026-checkout-pathspec-file.sh t2070-restore.sh t2071-restore-patch.sh t2072-restore-pathspec-file.sh t2080-parallel-checkout-basics.sh t2081-parallel-checkout-collisions.sh t2082-parallel-checkout-attributes.sh t2090-apfs-checkout.sh t2400-worktree-add.sh'

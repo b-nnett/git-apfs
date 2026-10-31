@@ -1,5 +1,7 @@
 """Differential tests for the actual Git binaries, not a command wrapper."""
 import hashlib
+import fcntl
+import json
 import os
 from pathlib import Path
 import re
@@ -282,6 +284,179 @@ class GitCoreTests(unittest.TestCase):
             self.assertEqual(wanted,bench.tracked_snapshot(target,env))
             self.assertEqual(source_before,bench.snapshot(repo))
             self.assertFalse(list(target.rglob('.git-apfs-*')))
+
+    def json_events(self,result):
+        return [json.loads(line) for line in result.stderr.decode().splitlines() if line.startswith('{')]
+
+    def test_lf_attributes_clone_and_crlf_output_falls_back(self):
+        for attributes,clones in [('* text eol=lf\n',True),('* text=auto\n',True),('* text eol=crlf\n',False)]:
+            with self.subTest(attributes=attributes),tempfile.TemporaryDirectory() as d:
+                root=Path(d);env,repo,base,_=self.fixture(root)
+                (repo/'.gitattributes').write_text(attributes)
+                bench.git(repo,env,'add','.gitattributes');bench.git(repo,env,'commit','-qm','attributes')
+                target=root/'target';self.worktree(repo,env,target,'HEAD')
+                relative='packages/pkg00/src/file000000.txt'
+                expected=(target/relative).read_bytes();(target/relative).write_bytes(b'dirty')
+                env['GIT_APFS_TRACE_JSON']='1'
+                result=self.run_git(FORK,target,env,'restore','--',relative)
+                self.assertEqual(0,result.returncode,result.stderr)
+                self.assertEqual(expected,(target/relative).read_bytes())
+                event=self.json_events(result)[-1]
+                self.assertEqual(clones,event['cloned']>0)
+                if not clones:self.assertGreater(event['rejection_events']['conversion'],0)
+
+    def test_cache_survives_without_a_registered_donor_and_repairs_corruption(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,_=self.fixture(root)
+            bench.git(repo,env,'config','apfs.cacheLimit','16k')
+            env['GIT_APFS_TRACE_JSON']='1'
+            warm=self.run_git(FORK,repo,env,'apfs','cache','warm')
+            self.assertEqual(0,warm.returncode,warm.stderr)
+            info=json.loads(warm.stdout)
+            self.assertLessEqual(info['cache']['charged_file_bytes'],16384)
+            self.assertGreater(info['cache']['entries'],0)
+            relative='space and café.txt';expected=(repo/relative).read_bytes()
+            oid=bench.git(repo,env,'rev-parse','HEAD:'+relative)
+            cached=repo/'.git/apfs-cache/v1'/oid
+            self.assertTrue(cached.is_file())
+            (repo/relative).write_bytes(b'dirty')
+            result=self.run_git(FORK,repo,env,'restore','--',relative)
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertEqual(expected,(repo/relative).read_bytes())
+            self.assertEqual(1,self.json_events(result)[-1]['cache']['hits'])
+            cached.chmod(0o600);cached.write_bytes(b'X'*len(expected));cached.chmod(0o400)
+            (repo/relative).write_bytes(b'dirty again')
+            result=self.run_git(FORK,repo,env,'restore','--',relative)
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertEqual(expected,(repo/relative).read_bytes())
+            self.assertEqual(expected,cached.read_bytes())
+            prune=self.run_git(FORK,repo,env,'apfs','cache','prune')
+            self.assertEqual(0,prune.returncode,prune.stderr)
+            self.assertFalse(cached.exists())
+
+    def test_cache_symlink_is_rejected_and_default_cache_is_off(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,_=self.fixture(root)
+            self.assertFalse((repo/'.git/apfs-cache').exists())
+            outside=root/'outside';outside.mkdir();(outside/'keep').write_text('keep')
+            (repo/'.git/apfs-cache').symlink_to(outside)
+            bench.git(repo,env,'config','apfs.cacheLimit','1m')
+            result=self.run_git(FORK,repo,env,'apfs','cache','warm')
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertFalse(json.loads(result.stdout)['cache']['available'])
+            self.assertEqual(['keep'],[p.name for p in outside.iterdir()])
+
+    def test_zero_worker_budget_preserves_clone_correctness(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,changed=self.fixture(root,1200)
+            target=root/'target';self.worktree(repo,env,target,changed)
+            bench.git(repo,env,'config','apfs.workerBudget','0');env['GIT_APFS_TRACE_JSON']='1'
+            result=self.run_git(FORK,target,env,'switch','--detach',base)
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertEqual(bench.tracked_snapshot(repo,env),bench.tracked_snapshot(target,env))
+            self.assertEqual(1,self.json_events(result)[-1]['workers']['selected'])
+            self.assertGreater(self.json_events(result)[-1]['cloned'],0)
+
+    def test_native_status_tuning_is_explicit_and_reversible(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,_=self.fixture(root)
+            before=(repo/'.git/config').read_bytes()
+            status=self.run_git(FORK,repo,env,'apfs','status')
+            self.assertEqual(0,status.returncode,status.stderr)
+            self.assertEqual(before,(repo/'.git/config').read_bytes())
+            tuned=self.run_git(FORK,repo,env,'apfs','tune')
+            self.assertEqual(0,tuned.returncode,tuned.stderr)
+            self.assertEqual('true',bench.git(repo,env,'config','core.fsmonitor'))
+            self.assertEqual('true',bench.git(repo,env,'config','core.untrackedCache'))
+            try:
+                self.assertEqual('',bench.git(repo,env,'status','--porcelain','-z'))
+            finally:
+                self.run_git(FORK,repo,env,'fsmonitor--daemon','stop')
+                self.run_git(BASE,repo,env,'fsmonitor--daemon','stop')
+
+    def test_add_caches_new_committed_content_and_orphans_are_cleaned(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,_=self.fixture(root)
+            bench.git(repo,env,'config','apfs.cacheLimit','32k');env['GIT_APFS_TRACE_JSON']='1'
+            relative='space and café.txt';payload=b'newly committed bytes\n'
+            (repo/relative).write_bytes(payload)
+            added=self.run_git(FORK,repo,env,'add','--',relative)
+            self.assertEqual(0,added.returncode,added.stderr)
+            bench.git(repo,env,'commit','-qm','new content')
+            oid=bench.git(repo,env,'rev-parse','HEAD:'+relative)
+            directory=repo/'.git/apfs-cache/v1';self.assertTrue((directory/oid).is_file())
+            (directory/'.tmp-orphan').write_bytes(b'interrupted cache writer')
+            (repo/relative).write_bytes(b'discard')
+            restored=self.run_git(FORK,repo,env,'restore','--',relative)
+            self.assertEqual(0,restored.returncode,restored.stderr)
+            self.assertEqual(payload,(repo/relative).read_bytes())
+            self.assertEqual(1,self.json_events(restored)[-1]['cache']['hits'])
+            self.assertFalse((directory/'.tmp-orphan').exists())
+
+    def test_worker_leases_honor_other_process_locks_and_are_released(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,changed=self.fixture(root,1200)
+            target=root/'target';self.worktree(repo,env,target,changed)
+            bench.git(repo,env,'config','apfs.workerBudget','2');env['GIT_APFS_TRACE_JSON']='1'
+            directory=repo/'.git/apfs-worker-budget';directory.mkdir(mode=0o700)
+            held=[]
+            try:
+                for i in range(2):
+                    handle=(directory/f'slot-{i}').open('w');fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB);held.append(handle)
+                result=self.run_git(FORK,target,env,'switch','--detach',base)
+                self.assertEqual(0,result.returncode,result.stderr)
+                self.assertEqual(1,self.json_events(result)[-1]['workers']['selected'])
+            finally:
+                for handle in held:handle.close()
+            result=self.run_git(FORK,target,env,'switch','--detach',changed)
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertEqual(3,self.json_events(result)[-1]['workers']['selected'])
+            for i in range(2):
+                with (directory/f'slot-{i}').open('r') as handle:fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB)
+
+    def test_large_file_batch_is_adaptive_and_phase_profile_is_observable(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,_=self.fixture(root)
+            for i in range(4):(repo/f'large-{i}').write_bytes(bytes([65+i])*(2*1024*1024))
+            bench.git(repo,env,'add','.');bench.git(repo,env,'commit','-qm','large batch')
+            target=root/'target';self.worktree(repo,env,target,'HEAD')
+            for i in range(4):(target/f'large-{i}').write_bytes(b'dirty')
+            env['GIT_APFS_PROFILE']='1'
+            result=self.run_git(FORK,target,env,'restore','--','large-0','large-1','large-2','large-3')
+            self.assertEqual(0,result.returncode,result.stderr)
+            event=self.json_events(result)[-1]
+            self.assertEqual(4,event['cloned'])
+            self.assertGreater(event['workers']['batches'],0)
+            self.assertGreater(event['work_ns']['donor_verify'],0)
+            self.assertGreater(event['work_ns']['clone'],0)
+            for i in range(4):self.assertEqual((repo/f'large-{i}').read_bytes(),(target/f'large-{i}').read_bytes())
+
+    def test_cache_fsmonitor_guard_is_reported_and_external_edits_are_visible(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,_=self.fixture(root)
+            for key,value in [('apfs.cacheLimit','1m'),('core.fsmonitor','true')]:
+                bench.git(repo,env,'config',key,value)
+            result=self.run_git(FORK,repo,env,'apfs','doctor')
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertTrue(json.loads(result.stdout)['cache']['fsmonitor_stat_guard'])
+            self.assertEqual('true',bench.git(repo,env,'config','core.fsmonitor'))
+            self.run_git(FORK,repo,env,'status','--porcelain')
+            path='space and café.txt';(repo/path).write_bytes(b'external edit')
+            status=self.run_git(FORK,repo,env,'status','--porcelain','-z')
+            self.assertIn(path.encode(),status.stdout)
+            result=self.run_git(FORK,repo,env,'restore','--',path)
+            self.assertEqual(0,result.returncode,result.stderr)
+            self.assertEqual(bench.git(repo,env,'show','HEAD:'+path).encode()+b'\n',(repo/path).read_bytes())
+
+    def test_clone_fsmonitor_guard_applies_without_cache_and_can_be_disabled(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);env,repo,base,_=self.fixture(root)
+            bench.git(repo,env,'config','core.fsmonitor','true')
+            result=self.run_git(FORK,repo,env,'apfs','doctor')
+            self.assertTrue(json.loads(result.stdout)['cache']['fsmonitor_stat_guard'])
+            bench.git(repo,env,'config','apfs.cloneCheckout','false')
+            result=self.run_git(FORK,repo,env,'apfs','doctor')
+            self.assertFalse(json.loads(result.stdout)['cache']['fsmonitor_stat_guard'])
 
     def test_sha256_checkout_uses_the_same_native_engine(self):
         with tempfile.TemporaryDirectory() as d:

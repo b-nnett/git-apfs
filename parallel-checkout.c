@@ -677,11 +677,13 @@ int run_parallel_checkout(struct checkout *state, int num_workers, int threshold
 	if (parallel_checkout.nr < num_workers)
 		num_workers = parallel_checkout.nr;
 
-	if (num_workers <= 1 || parallel_checkout.nr < threshold) {
+	if (num_workers <= 1 || (parallel_checkout.nr < threshold &&
+	    !apfs_checkout_large_batch(parallel_checkout.items, parallel_checkout.nr))) {
 		write_items_sequentially(state);
 	} else if (apfs_checkout_batch(parallel_checkout.items, parallel_checkout.nr,
 				       state, num_workers)) {
 		write_items_sequentially(state);
+		apfs_checkout_finish_batch();
 	} else {
 		struct pc_worker *workers = setup_workers(state, num_workers);
 		gather_results_from_workers(workers, num_workers);

@@ -1163,6 +1163,7 @@ LIB_OBJS += dir.o
 LIB_OBJS += editor.o
 LIB_OBJS += entry.o
 LIB_OBJS += apfs-checkout.o
+LIB_OBJS += apfs-cache.o
 LIB_OBJS += environment.o
 LIB_OBJS += ewah/bitmap.o
 LIB_OBJS += ewah/ewah_bitmap.o
@@ -1389,6 +1390,7 @@ LIB_OBJS += xdiff/xprepare.o
 LIB_OBJS += xdiff/xutils.o
 
 BUILTIN_OBJS += builtin/add.o
+BUILTIN_OBJS += builtin/apfs.o
 BUILTIN_OBJS += builtin/am.o
 BUILTIN_OBJS += builtin/annotate.o
 BUILTIN_OBJS += builtin/apply.o

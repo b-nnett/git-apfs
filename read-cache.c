@@ -9,6 +9,8 @@
 
 #include "git-compat-util.h"
 #include "config.h"
+#include "entry.h"
+#include "apfs-checkout.h"
 #include "date.h"
 #include "diff.h"
 #include "diffcore.h"
@@ -809,6 +811,11 @@ int add_to_index(struct index_state *istate, const char *path, struct stat *st, 
 		    oideq(&alias->oid, &ce->oid) &&
 		    ce->ce_mode == alias->ce_mode);
 
+	if (!pretend && !intent_only) {
+		struct checkout cache_state = CHECKOUT_INIT;
+		cache_state.istate = istate;
+		apfs_checkout_cache_entry(&cache_state, ce);
+	}
 	if (pretend)
 		discard_cache_entry(ce);
 	else if (add_index_entry(istate, ce, add_option)) {

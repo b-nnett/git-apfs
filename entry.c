@@ -271,6 +271,7 @@ int finish_delayed_checkout(struct checkout *state, int show_progress)
 void update_ce_after_write(const struct checkout *state, struct cache_entry *ce,
 			   struct stat *st)
 {
+	apfs_checkout_cache_entry(state, ce);
 	if (state->refresh_cache) {
 		assert(state->istate);
 		fill_stat_cache_info(state->istate, ce, st);

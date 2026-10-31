@@ -1,12 +1,13 @@
 {
   "repository": "https://github.com/git/git.git",
-  "tag": "v2.50.1",
-  "commit": "d82adb61ba2fd11d8f2587fca1b6bd7925ce4044",
-  "version": "2.50.1",
-  "apfs_version": "2.50.1.apfs.2",
+  "tag": "v2.56.0",
+  "commit": "a018953688f1b10bddf91bff8747068f5f4746a4",
+  "version": "2.56.0",
+  "apfs_version": "2.56.0.apfs.3",
   "make_options": [
+    "NO_RUST=YesPlease",
     "NO_GETTEXT=YesPlease",
     "NO_TCLTK=YesPlease"
   ],
-  "patch_sha256": "921f765f4d66fe800c85acc8aa41242b5754ecb0a0ba9752f261b8869a879234"
+  "patch_sha256": "ce8a0cfb323e7a6674d570d20347779b4e67e3e385fdfef5bc07ab75019d0ce7"
 }

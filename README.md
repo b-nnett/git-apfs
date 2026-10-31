@@ -2,89 +2,101 @@
 
 **Agents Prioritized, Files Shared.**
 
-A real Git fork for agent workspaces on macOS APFS. Verified copy-on-write
-checkout lives inside Git's C checkout engine, so `switch`, `restore` and
-`worktree add` can share file extents with another registered worktree.
-The executable is `git`: there is no command wrapper or compaction pass.
-
-This is an experimental fork based on Git v2.50.1, not a current-upstream
-production release. Other commands remain Git's built-ins; they are not all
-optimized by this patch. Git's GPL v2 license, attribution and history are retained.
+An experimental Git fork for agent workspaces on macOS APFS, based on Git
+v2.56.0. Verified copy-on-write checkout lives inside Git's C checkout engine:
+`switch`, `restore` and `worktree add` can share file extents. The executable is
+`git`, with Git's normal built-ins, object/index formats and GPL v2 license.
 
 ## Build
 
-Requires macOS developer tools and make. Install into your own prefix:
+Requires macOS developer tools and make. Install into a separate prefix:
 
 ```sh
-make -j4 NO_GETTEXT=YesPlease NO_TCLTK=YesPlease prefix="$HOME/.local/git-apfs" install
+make -j4 NO_RUST=YesPlease NO_GETTEXT=YesPlease NO_TCLTK=YesPlease prefix="$HOME/.local/git-apfs" install
 export PATH="$HOME/.local/git-apfs/bin:$PATH"
 git --version
+git apfs doctor
 git switch branch-name
 git restore -- path/to/file
 ```
 
-Choose a prefix separate from system Git. Omitting gettext and Tcl/Tk matches
-the benchmark build; CLI remote helpers remain included. On other operating
-systems the APFS helper falls back to native Git behavior.
+These options use Git's C implementation without Cargo, translations or Tcl/Tk
+GUI programs. CLI remote helpers remain included. Other platforms use native
+checkout behavior; the APFS optimization requires macOS and a suitable volume.
 
-## How it works
+## Checkout and agent controls
 
-- Finds the same path in another registered worktree and verifies its Git blob
-  identity. Small files use Git's canonical blob hash with SHA-1/SHA-256 and
-  replacement-object support; larger files use a literal byte comparison.
-  Donor HEAD/index metadata is not trusted.
-- Uses no-follow directory opens and pinned file descriptors, checks source
-  metadata around verification/cloning, and publishes a private clone with an
-  exclusive rename. Git retains dirty-file protection, index/ref updates and hooks.
-- Overlaps main-thread object lookup with bounded filesystem/hash workers.
-  Object-store access, configuration, index updates and trace counters stay on
-  the main thread. Each worker owns its directory cache and hash context. The donor-directory handle can be reused; target ancestors are walked
-  afresh. Batch capacity adapts to the descriptor limit and is capped at 256 files.
-- Defaults to up to eight workers for eligible batches of at least 100 entries
-  when a registered donor exists on the same APFS volume. Explicit
-  `checkout.workers` and `checkout.thresholdForParallelism` settings win.
-- Uses ordinary Git writes for filters, text/encoding conversions, symlinks,
-  special metadata, files over 64 MiB, unavailable donors and clone failures
-  before publication. Errors after publication are reported without retrying.
-
-No index formats, object formats, trust flags or global settings are changed.
-There is no persistent donor cache, and no space benefit without an eligible
-registered donor. Normal Git locks and the usual requirement to avoid concurrent
-external filesystem writers still apply.
+- Streams SHA-1/SHA-256 verification against the exact resolved Git blob before
+  cloning. Donor HEAD/index metadata is never sufficient proof. Files up to
+  64 MiB are eligible, including byte-preserving LF text attributes.
+- Uses pinned no-follow donor descriptors, private clone publication, fresh
+  checkout timestamps and Git's normal dirty-file protection and index updates.
+  Filters, CRLF conversions, encoding/ident conversion, special metadata,
+  symlinks, unavailable donors and pre-publication failures use native writes.
+- Reuses donor directory handles and successful donor search hints, without
+  skipping verification. Bounded batches overlap main-thread object lookup with
+  filesystem/hash workers. Large batches can start below the usual file-count
+  threshold; explicit checkout worker/threshold settings retain precedence.
+- Shares a default budget of eight auxiliary threads across processes in one
+  repository. Caller threads are additional. OS file-lock leases release on
+  process death. Set `apfs.workerBudget` to 0..64; explicit `checkout.workers`
+  overrides the automatic budget.
+- Initializes worktree common-directory metadata before publishing its linking
+  files, closing a concurrent discovery race during worktree creation.
 
 ```sh
-GIT_APFS_TRACE=1 git restore -- file  # actual clone counts, logical byte counts
+git apfs doctor                 # read-only JSON diagnostics
+git apfs tune                   # enable native FSMonitor/untracked-cache config
+GIT_APFS_TRACE_JSON=1 git restore -- file
+GIT_APFS_PROFILE=1 git switch branch-name  # extra phase/worker timings
 GIT_APFS_CLONE_CHECKOUT=0 git restore -- file  # native-write control
-# Repository configuration also works:
-git config apfs.cloneCheckout false
 ```
 
-Trace byte counts are logical contents, not physical savings. Physical space
-must be measured independently on an isolated APFS container.
+`tune` changes repository configuration, so compare with equally tuned upstream
+Git. No global settings are changed. Diagnostics report clone coverage, fallback
+reasons, worker activity and cache accounting. Clone byte counts are logical
+contents; physical savings require an independent allocation measurement.
 
-## Benchmarks and tests
+## Optional donor cache
 
-[Measured results and limitations](contrib/apfs/results.md) report both latency
-and retained physical allocation, including first status and Git metadata.
-[Implementation details](contrib/apfs/native/README.md) describe the bounded fast
-path and controls. Benchmark scripts and targeted differential tests are in
-`contrib/apfs/`.
+The cache is **off by default**. It retains verified snapshots even after donor
+worktrees disappear. Checkout and `add` populate it when enabled:
 
-For reproducible matched upstream/fork builds and comparisons:
+```sh
+git config apfs.cacheLimit 64m
+git apfs cache warm
+git apfs cache status
+git apfs cache prune
+```
+
+The private common-directory cache uses verified blob identities, opportunistic
+writer locking and FIFO eviction. Its quota charges at least 4 KiB per entry or
+allocated file blocks, whichever is greater; directory/lock metadata is extra.
+This conservatively charges shared extents more than once. Cache warm-up costs
+and retained cache storage must be included when assessing benefit.
+
+**APFS + FSMonitor guard:** concurrent stress tests exposed missed external
+edits during APFS checkout workloads. With APFS cloning or a positive `apfs.cacheLimit`, Git
+therefore bypasses FSMonitor and uses normal stat checks. Configuration is
+preserved and diagnostics report `cache.fsmonitor_stat_guard`. Untracked cache
+remains available. The FSEvents interaction is unresolved; the guard is deliberate.
+
+## Measurements and validation
+
+[Results and limitations](contrib/apfs/results.md) cover speed and physical disk
+usage. [Build and benchmark instructions](contrib/apfs/native/README.md) include
+matched upstream/fork builds and controls. The real-repository agent runner
+measures concurrent creation, status, diff, add, commit, restore, switch and
+cleanup, with per-command p50/p95, CPU/RSS and isolated-container disk accounting.
 
 ```sh
 python3 contrib/apfs/native/build.py
-python3 contrib/apfs/benchmarks/checkout.py --mode latency --repeats 3
-python3 contrib/apfs/benchmarks/checkout.py --mode storage --repeats 3
 python3 -m unittest discover -s contrib/apfs/tests -v
+python3 contrib/apfs/benchmarks/checkout.py --mode latency --paired
+python3 contrib/apfs/benchmarks/checkout.py --mode storage
+python3 contrib/apfs/benchmarks/agents.py --source /path/to/repo --agents 1,8,32
 ```
 
-Storage trials require macOS disk-image tools and use disposable private APFS
-containers. Both variants begin with CoW-shared worktrees to isolate command
-savings from initial worktree creation. Raw timing and allocation samples are
-recorded locally. These are synthetic agent workflows, not a guarantee for every
-repository or workload.
-
-Git's native APFS regressions are in `t/t2090-apfs-checkout.sh`. The full upstream
-suite has not yet been run. See [upstream Git's README](README.upstream.md) for
-Git's general documentation and contribution information.
+This remains an experimental fork. Other Git commands retain upstream behavior;
+not every workload becomes faster. The full upstream suite has not been run.
+See [upstream Git's README](README.upstream.md) for general Git documentation.

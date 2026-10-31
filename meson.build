@@ -311,6 +311,8 @@ libgit_sources = [
   'add-interactive.c',
   'add-patch.c',
   'advice.c',
+  'apfs-cache.c',
+  'apfs-checkout.c',
   'alias.c',
   'alloc.c',
   'apply.c',
@@ -600,6 +602,7 @@ libgit_sources += custom_target(
 builtin_sources = [
   hook_list,
   'builtin/add.c',
+  'builtin/apfs.c',
   'builtin/am.c',
   'builtin/annotate.c',
   'builtin/apply.c',

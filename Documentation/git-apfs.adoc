@@ -1,0 +1,64 @@
+git-apfs(1)
+===========
+
+NAME
+----
+git-apfs - Inspect and configure APFS agent-workspace optimizations
+
+SYNOPSIS
+--------
+[verse]
+'git apfs' (status | doctor | tune)
+'git apfs cache' (status | warm | prune)
+
+DESCRIPTION
+-----------
+This experimental Git fork shares verified file extents during checkout.
+`status` and `doctor` print JSON configuration and cache accounting without
+changing repository configuration. `tune` explicitly enables Git's native
+FSMonitor and untracked cache for the current repository. Configure the same
+features in an upstream Git control when comparing performance.
+
+When APFS cloning or the optional donor cache is enabled, FSMonitor is bypassed and Git uses
+normal stat validation. Concurrent APFS checkouts exposed missed edits
+with FSEvents; this conservative guard remains until that interaction is fixed.
+The configuration value is preserved, and untracked cache remains available.
+Diagnostics expose this as `cache.fsmonitor_stat_guard`.
+
+`cache warm` stores verified snapshots of matching tracked working files.
+`cache prune` removes owned cache entries, preserving unknown files and links.
+The cache is disabled by default. Set `apfs.cacheLimit` to a positive byte budget
+(with optional k/m/g suffix) before warming. Checkout and add also populate it.
+Entries are addressed by resolved Git blob identity and always reverified before
+use. Writer locking is opportunistic; a busy writer causes caching to be skipped.
+Eviction is FIFO. Charge is the greater of allocated file blocks and 4096 bytes
+per entry, conservatively double-counting shared extents. Directory/lock metadata
+is additional; use isolated-container measurements for unique physical usage.
+
+CONFIGURATION
+-------------
+`apfs.cloneCheckout`::
+	Enable verified cloning (default true on macOS).
+`apfs.workerBudget`::
+	Shared auxiliary-thread budget per repository (default 8, range 0..64).
+	The caller threads are not counted. Leases use close-on-exec file locks
+	and are automatically released on exit or process death. Explicit
+	`checkout.workers` settings override the automatic budget.
+`apfs.cacheLimit`::
+	Optional cache charge limit in bytes (default 0, disabled). A writer
+	trims to its configured limit before storing. Reducing a limit does not
+	immediately remove entries; use `cache prune` or `cache warm` to apply it.
+
+DIAGNOSTICS
+-----------
+`GIT_APFS_TRACE_JSON=1` emits per-process JSON to stderr, including checkout
+counts, donor probes, rejection events, cache accounting and worker leases.
+Rejection events count failed probes as well as final fallbacks; they are not
+mutually exclusive file categories. `GIT_APFS_PROFILE=1` additionally records
+object-lookup, verification, clone and publication elapsed work durations.
+Parallel work durations are sums and can exceed wall time. Normal stdout is
+unchanged. `GIT_APFS_CLONE_CHECKOUT=0` disables checkout and cache population.
+
+GIT
+---
+Part of the linkgit:git[1] suite

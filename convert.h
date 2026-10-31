@@ -91,6 +91,8 @@ struct conv_attrs {
 void convert_attrs(struct index_state *istate,
 		   struct conv_attrs *ca, const char *path);
 
+int convert_attrs_preserve_bytes(const struct conv_attrs *ca);
+
 extern enum eol core_eol;
 extern char *check_roundtrip_encoding;
 const char *get_cached_convert_stats_ascii(struct index_state *istate,

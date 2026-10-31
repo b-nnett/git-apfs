@@ -1,5 +1,85 @@
+diff --git a/.gitignore b/.gitignore
+index 4da58c6754..3f1a01c132 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -261,3 +261,5 @@ Release/
+ /contrib/buildsystems/out
+ /contrib/libgit-rs/target
+ /contrib/libgit-sys/target
++
++/git-apfs
+diff --git a/Documentation/git-apfs.adoc b/Documentation/git-apfs.adoc
+new file mode 100644
+index 0000000000..d2d0406eeb
+--- /dev/null
++++ b/Documentation/git-apfs.adoc
+@@ -0,0 +1,64 @@
++git-apfs(1)
++===========
++
++NAME
++----
++git-apfs - Inspect and configure APFS agent-workspace optimizations
++
++SYNOPSIS
++--------
++[verse]
++'git apfs' (status | doctor | tune)
++'git apfs cache' (status | warm | prune)
++
++DESCRIPTION
++-----------
++This experimental Git fork shares verified file extents during checkout.
++`status` and `doctor` print JSON configuration and cache accounting without
++changing repository configuration. `tune` explicitly enables Git's native
++FSMonitor and untracked cache for the current repository. Configure the same
++features in an upstream Git control when comparing performance.
++
++When APFS cloning or the optional donor cache is enabled, FSMonitor is bypassed and Git uses
++normal stat validation. Concurrent APFS checkouts exposed missed edits
++with FSEvents; this conservative guard remains until that interaction is fixed.
++The configuration value is preserved, and untracked cache remains available.
++Diagnostics expose this as `cache.fsmonitor_stat_guard`.
++
++`cache warm` stores verified snapshots of matching tracked working files.
++`cache prune` removes owned cache entries, preserving unknown files and links.
++The cache is disabled by default. Set `apfs.cacheLimit` to a positive byte budget
++(with optional k/m/g suffix) before warming. Checkout and add also populate it.
++Entries are addressed by resolved Git blob identity and always reverified before
++use. Writer locking is opportunistic; a busy writer causes caching to be skipped.
++Eviction is FIFO. Charge is the greater of allocated file blocks and 4096 bytes
++per entry, conservatively double-counting shared extents. Directory/lock metadata
++is additional; use isolated-container measurements for unique physical usage.
++
++CONFIGURATION
++-------------
++`apfs.cloneCheckout`::
++	Enable verified cloning (default true on macOS).
++`apfs.workerBudget`::
++	Shared auxiliary-thread budget per repository (default 8, range 0..64).
++	The caller threads are not counted. Leases use close-on-exec file locks
++	and are automatically released on exit or process death. Explicit
++	`checkout.workers` settings override the automatic budget.
++`apfs.cacheLimit`::
++	Optional cache charge limit in bytes (default 0, disabled). A writer
++	trims to its configured limit before storing. Reducing a limit does not
++	immediately remove entries; use `cache prune` or `cache warm` to apply it.
++
++DIAGNOSTICS
++-----------
++`GIT_APFS_TRACE_JSON=1` emits per-process JSON to stderr, including checkout
++counts, donor probes, rejection events, cache accounting and worker leases.
++Rejection events count failed probes as well as final fallbacks; they are not
++mutually exclusive file categories. `GIT_APFS_PROFILE=1` additionally records
++object-lookup, verification, clone and publication elapsed work durations.
++Parallel work durations are sums and can exceed wall time. Normal stdout is
++unchanged. `GIT_APFS_CLONE_CHECKOUT=0` disables checkout and cache population.
++
++GIT
++---
++Part of the linkgit:git[1] suite
 diff --git a/GIT-VERSION-GEN b/GIT-VERSION-GEN
-index 2df7e18..37671b8 100755
+index 64f4abd0f3..d488f6e473 100755
 --- a/GIT-VERSION-GEN
 +++ b/GIT-VERSION-GEN
 @@ -58,6 +58,10 @@ then
@@ -8,48 +88,405 @@ index 2df7e18..37671b8 100755
  	GIT_VERSION=$(expr "$VN" : v*'\(.*\)')
 +	case "$GIT_VERSION" in
 +	*.apfs.*) ;;
-+	*) GIT_VERSION="$GIT_VERSION.apfs.2" ;;
++	*) GIT_VERSION="$GIT_VERSION.apfs.3" ;;
 +	esac
  fi
  
  if test -z "$GIT_BUILT_FROM_COMMIT"
 diff --git a/Makefile b/Makefile
-index 70d1543..49187bb 100644
+index c649c93c51..3fd2ef1aa3 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -1024,6 +1024,7 @@ LIB_OBJS += dir-iterator.o
+@@ -1162,6 +1162,8 @@ LIB_OBJS += dir-iterator.o
  LIB_OBJS += dir.o
  LIB_OBJS += editor.o
  LIB_OBJS += entry.o
 +LIB_OBJS += apfs-checkout.o
++LIB_OBJS += apfs-cache.o
  LIB_OBJS += environment.o
  LIB_OBJS += ewah/bitmap.o
  LIB_OBJS += ewah/ewah_bitmap.o
+@@ -1388,6 +1390,7 @@ LIB_OBJS += xdiff/xprepare.o
+ LIB_OBJS += xdiff/xutils.o
+ 
+ BUILTIN_OBJS += builtin/add.o
++BUILTIN_OBJS += builtin/apfs.o
+ BUILTIN_OBJS += builtin/am.o
+ BUILTIN_OBJS += builtin/annotate.o
+ BUILTIN_OBJS += builtin/apply.o
+diff --git a/apfs-cache.c b/apfs-cache.c
+new file mode 100644
+index 0000000000..208c76391f
+--- /dev/null
++++ b/apfs-cache.c
+@@ -0,0 +1,317 @@
++/* Git-owned optional donor cache and crash-safe auxiliary-worker leases. GPLv2. */
++/* Cache filenames are ASCII OIDs; fdopendir needs the raw dirent API. */
++#define PRECOMPOSE_UNICODE_C
++#include "git-compat-util.h"
++#include "apfs-cache.h"
++#include "config.h"
++#include "hex.h"
++#include "repository.h"
++#include "hash.h"
++#include "object-file.h"
++#ifdef __APPLE__
++#include <sys/clonefile.h>
++#include <sys/file.h>
++
++struct cached_entry { char *name; uintmax_t charge; struct timespec age; dev_t dev; ino_t ino; };
++static struct apfs_cache_stats stats;
++static struct cached_entry *entries;
++static size_t nr, alloc, victim;
++static int root_fd = -1, cache_fd = -1, writer_fd = -1, initialized;
++static int leases[64], lease_nr;
++static const struct git_hash_algo *hash_algo;
++static int evict_one(void);
++
++static int private_dir(int parent, const char *name, int create)
++{
++	struct stat st;
++	int fd;
++	if (create && mkdirat(parent, name, 0700) && errno != EEXIST)
++		return -1;
++	fd = openat(parent, name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
++	if (fd >= 0 && (fstat(fd, &st) || st.st_uid != geteuid() || (st.st_mode & 0077))) {
++		close(fd);
++		return -1;
++	}
++	return fd;
++}
++
++static uintmax_t charge(const struct stat *st)
++{
++	uintmax_t bytes = (uintmax_t)st->st_blocks * 512;
++	return bytes < 4096 ? 4096 : bytes;
++}
++
++static int valid_name(const char *name)
++{
++	size_t n = strlen(name), i;
++	if (n != 40 && n != 64)
++		return 0;
++	for (i = 0; i < n; i++)
++		if (!((name[i] >= '0' && name[i] <= '9') || (name[i] >= 'a' && name[i] <= 'f')))
++			return 0;
++	return 1;
++}
++
++static int by_age(const void *va, const void *vb)
++{
++	const struct cached_entry *a = va, *b = vb;
++	if (a->age.tv_sec != b->age.tv_sec)
++		return a->age.tv_sec < b->age.tv_sec ? -1 : 1;
++	if (a->age.tv_nsec != b->age.tv_nsec)
++		return a->age.tv_nsec < b->age.tv_nsec ? -1 : 1;
++	return strcmp(a->name, b->name);
++}
++
++static void scan(int clean)
++{
++	DIR *dir;
++	struct dirent *de;
++	struct stat st;
++	size_t i;
++	for (i = 0; i < nr; i++) free(entries[i].name);
++	nr = victim = 0;
++	stats.charged_bytes = stats.entries = stats.directory_bytes = 0;
++	if (cache_fd < 0) return;
++	if (!fstat(cache_fd, &st)) stats.directory_bytes = (uintmax_t)st.st_blocks * 512;
++	/* openat gives an independent directory offset; dup would share offsets. */
++	dir = fdopendir(openat(cache_fd, ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC));
++	if (!dir) return;
++	while ((de = readdir(dir))) {
++		if (fstatat(cache_fd, de->d_name, &st, AT_SYMLINK_NOFOLLOW) ||
++		    !S_ISREG(st.st_mode) || st.st_uid != geteuid()) continue;
++		if (clean && !strncmp(de->d_name, ".tmp-", 5)) {
++			unlinkat(cache_fd, de->d_name, 0);
++			continue;
++		}
++		if (!valid_name(de->d_name)) continue;
++		ALLOC_GROW(entries, nr + 1, alloc);
++		entries[nr].name = xstrdup(de->d_name);
++		entries[nr].charge = charge(&st);
++		entries[nr].age = st.st_mtimespec;
++		entries[nr].dev = st.st_dev;
++		entries[nr].ino = st.st_ino;
++		stats.charged_bytes += entries[nr++].charge;
++	}
++	closedir(dir);
++	stats.entries = nr;
++	QSORT(entries, nr, by_age);
++}
++
++static void cleanup(void)
++{
++	size_t i;
++	if (writer_fd >= 0) close(writer_fd);
++	if (cache_fd >= 0) close(cache_fd);
++	if (root_fd >= 0) close(root_fd);
++	for (i = 0; i < nr; i++) free(entries[i].name);
++	free(entries);
++	apfs_budget_release();
++}
++
++void apfs_cache_init(struct repository *repo)
++{
++	unsigned long limit = 0;
++	int parent;
++	if (initialized) return;
++	initialized = 1;
++	atexit(cleanup);
++	repo_config_get_ulong(repo, "apfs.cachelimit", &limit);
++	stats.limit = limit;
++	hash_algo = repo->hash_algo;
++	root_fd = open(repo_get_common_dir(repo), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
++	if (root_fd < 0) return;
++	parent = private_dir(root_fd, "apfs-cache", limit != 0);
++	if (parent < 0) return;
++	cache_fd = private_dir(parent, "v1", limit != 0);
++	close(parent);
++	stats.available = cache_fd >= 0;
++}
++
++static int begin_write(void)
++{
++	struct stat st;
++	int fd;
++	if (!stats.limit || cache_fd < 0 || stats.writer_busy) return 0;
++	if (writer_fd >= 0) return 1;
++	fd = openat(cache_fd, ".lock", O_RDWR | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0600);
++	if (fd < 0) return 0;
++	if (fstat(fd, &st) || !S_ISREG(st.st_mode) || st.st_uid != geteuid() || st.st_nlink != 1 ||
++	    flock(fd, LOCK_EX | LOCK_NB)) {
++		close(fd);
++		stats.writer_busy = 1;
++		return 0;
++	}
++	writer_fd = fd;
++	scan(1);
++	while (stats.charged_bytes > stats.limit && evict_one());
++	return 1;
++}
++
++static int evict_one(void)
++{
++	while (victim < nr) {
++		struct cached_entry *e = &entries[victim++];
++		struct stat st;
++		if (!fstatat(cache_fd, e->name, &st, AT_SYMLINK_NOFOLLOW) &&
++		    st.st_dev == e->dev && st.st_ino == e->ino &&
++		    !unlinkat(cache_fd, e->name, 0)) {
++			stats.charged_bytes -= e->charge;
++			stats.entries--;
++			stats.evicted++;
++			return 1;
++		}
++	}
++	return 0;
++}
++
++int apfs_cache_open(const struct object_id *oid)
++{
++	struct stat st;
++	int fd;
++	char name[GIT_MAX_HEXSZ + 1];
++	if (!stats.limit || cache_fd < 0) return -1;
++	oid_to_hex_r(name, oid);
++	fd = openat(cache_fd, name, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
++	if (fd >= 0 && (fstat(fd, &st) || !S_ISREG(st.st_mode) || st.st_uid != geteuid())) {
++		close(fd);
++		return -1;
++	}
++	return fd;
++}
++
++static int verified_snapshot(int fd, size_t size, const struct object_id *expected)
++{
++	struct git_hash_ctx ctx;
++	struct object_id actual;
++	char header[32], buffer[65536];
++	size_t done = 0;
++	int len = format_object_header(header, sizeof(header), OBJ_BLOB, size);
++	git_hash_init(&ctx, hash_algo);
++	git_hash_update(&ctx, header, len);
++	while (done < size) {
++		size_t want = size - done;
++		if (want > sizeof(buffer)) want = sizeof(buffer);
++		if (read_in_full(fd, buffer, want) != (ssize_t)want) { git_hash_discard(&ctx); return 0; }
++		git_hash_update(&ctx, buffer, want);
++		done += want;
++	}
++	git_hash_final_oid(&actual, &ctx);
++	return oideq(&actual, expected);
++}
++
++int apfs_cache_store(const struct object_id *oid, int source)
++{
++	struct stat st, clone_st, after;
++	uint64_t nonce;
++	uintmax_t cost;
++	char name[GIT_MAX_HEXSZ + 1], temporary[64];
++	int output, result = 0;
++	if (!begin_write() || fstat(source, &st)) return 0;
++	xsnprintf(name, sizeof(name), "%s", oid_to_hex(oid));
++	if (!fstatat(cache_fd, name, &after, AT_SYMLINK_NOFOLLOW)) {
++		int existing;
++		if (!S_ISREG(after.st_mode) || after.st_uid != geteuid()) return 0;
++		existing = openat(cache_fd, name, O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
++		if (existing < 0) return 0;
++		result = after.st_size > 0 && after.st_size <= 64 * 1024 * 1024 &&
++			verified_snapshot(existing, after.st_size, oid);
++		close(existing);
++		if (result) return 0;
++		if (unlinkat(cache_fd, name, 0)) return 0;
++		scan(1);
++		result = 0;
++	}
++	cost = charge(&st);
++	if (cost > stats.limit) return 0;
++	if (csprng_bytes(&nonce, sizeof(nonce), 0) < 0) return 0;
++	xsnprintf(temporary, sizeof(temporary), ".tmp-%"PRIx64, nonce);
++	if (fclonefileat(source, cache_fd, temporary, CLONE_NOOWNERCOPY)) return 0;
++	output = openat(cache_fd, temporary, O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
++	if (output < 0) goto out;
++	if (fstat(output, &clone_st) || fstat(source, &after) ||
++	    st.st_ino != after.st_ino || st.st_size != after.st_size ||
++	    st.st_mtimespec.tv_sec != after.st_mtimespec.tv_sec ||
++	    st.st_mtimespec.tv_nsec != after.st_mtimespec.tv_nsec ||
++	    st.st_ctimespec.tv_sec != after.st_ctimespec.tv_sec ||
++	    st.st_ctimespec.tv_nsec != after.st_ctimespec.tv_nsec ||
++	    !verified_snapshot(output, clone_st.st_size, oid) || fchmod(output, 0400) || futimens(output, NULL)) goto close_out;
++	cost = charge(&clone_st);
++	while (cost <= stats.limit && stats.charged_bytes > stats.limit - cost)
++		if (!evict_one()) break;
++	if (cost > stats.limit || stats.charged_bytes > stats.limit - cost) goto close_out;
++	if (!renameatx_np(cache_fd, temporary, cache_fd, name, RENAME_EXCL)) {
++		stats.charged_bytes += cost;
++		stats.entries++;
++		stats.stored++;
++		result = 1;
++		/* New entries join FIFO eviction order without a directory rescan. */
++		ALLOC_GROW(entries, nr + 1, alloc);
++		entries[nr].name = xstrdup(name);
++		entries[nr].charge = cost;
++		entries[nr].dev = clone_st.st_dev;
++		entries[nr].ino = clone_st.st_ino;
++		entries[nr++].age = clone_st.st_mtimespec;
++	}
++ close_out:
++	close(output);
++ out:
++	if (!result) unlinkat(cache_fd, temporary, 0);
++	return result;
++}
++
++int apfs_cache_prune(void)
++{
++	uintmax_t saved = stats.limit;
++	int ok;
++	if (!stats.limit) stats.limit = UINTMAX_MAX;
++	ok = begin_write();
++	stats.limit = saved;
++	if (!ok) return -1;
++	while (evict_one());
++	return stats.entries ? -1 : 0;
++}
++
++void apfs_cache_stats(struct apfs_cache_stats *out, int refresh)
++{
++	if (refresh) scan(0);
++	*out = stats;
++}
++
++int apfs_budget_acquire(struct repository *repo, int wanted, int budget)
++{
++	int parent, i;
++	struct stat st;
++	if (lease_nr) return lease_nr;
++	if (wanted < 1 || budget < 1) return 0;
++	if (budget > 64) budget = 64;
++	apfs_cache_init(repo);
++	if (root_fd < 0) return 0;
++	parent = private_dir(root_fd, "apfs-worker-budget", 1);
++	if (parent < 0) return 0;
++	for (i = 0; i < budget && lease_nr < wanted; i++) {
++		char name[32];
++		int fd;
++		xsnprintf(name, sizeof(name), "slot-%d", i);
++		fd = openat(parent, name, O_RDWR | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0600);
++		if (fd < 0) continue;
++		if (fstat(fd, &st) || !S_ISREG(st.st_mode) || st.st_uid != geteuid() || st.st_nlink != 1 ||
++		    flock(fd, LOCK_EX | LOCK_NB)) { close(fd); continue; }
++		leases[lease_nr++] = fd;
++	}
++	close(parent);
++	return lease_nr;
++}
++
++void apfs_budget_release(void)
++{
++	while (lease_nr) close(leases[--lease_nr]);
++}
++#else
++void apfs_cache_init(struct repository *r UNUSED) { }
++int apfs_cache_open(const struct object_id *oid UNUSED) { return -1; }
++int apfs_cache_store(const struct object_id *oid UNUSED, int source UNUSED) { return 0; }
++int apfs_cache_prune(void) { return -1; }
++void apfs_cache_stats(struct apfs_cache_stats *out, int refresh UNUSED) { memset(out, 0, sizeof(*out)); }
++int apfs_budget_acquire(struct repository *r UNUSED, int wanted UNUSED, int budget UNUSED) { return 0; }
++void apfs_budget_release(void) { }
++#endif
+diff --git a/apfs-cache.h b/apfs-cache.h
+new file mode 100644
+index 0000000000..29d4717eff
+--- /dev/null
++++ b/apfs-cache.h
+@@ -0,0 +1,17 @@
++#ifndef APFS_CACHE_H
++#define APFS_CACHE_H
++struct repository;
++struct object_id;
++struct apfs_cache_stats {
++	uintmax_t limit, charged_bytes, entries, stored, evicted, hits;
++	uintmax_t directory_bytes;
++	int available, writer_busy;
++};
++void apfs_cache_init(struct repository *repo);
++int apfs_cache_open(const struct object_id *oid);
++int apfs_cache_store(const struct object_id *oid, int source);
++int apfs_cache_prune(void);
++void apfs_cache_stats(struct apfs_cache_stats *out, int refresh);
++int apfs_budget_acquire(struct repository *repo, int wanted, int budget);
++void apfs_budget_release(void);
++#endif
 diff --git a/apfs-checkout.c b/apfs-checkout.c
 new file mode 100644
-index 0000000..95b4ce7
+index 0000000000..22e523724a
 --- /dev/null
 +++ b/apfs-checkout.c
-@@ -0,0 +1,622 @@
-+/* APFS checkout optimization. Distributed under Git's GPL version 2. */
+@@ -0,0 +1,660 @@
++/* APFS checkout engine. Git object/index/config access stays on the caller. GPLv2. */
 +#define USE_THE_REPOSITORY_VARIABLE
 +#include "git-compat-util.h"
 +#include "apfs-checkout.h"
++#include "apfs-cache.h"
++#include "builtin.h"
 +#include "config.h"
 +#include "abspath.h"
 +#include "convert.h"
 +#include "entry.h"
 +#include "hex.h"
-+#include "object-store.h"
++#include "odb.h"
 +#include "object-file.h"
 +#include "replace-object.h"
-+#include "parse.h"
 +#include "parallel-checkout.h"
 +#include "read-cache-ll.h"
-+#include "tree-walk.h"
 +#include "worktree.h"
 +#include "thread-utils.h"
-+
++#include "json-writer.h"
++#include "trace.h"
++#include "setup.h"
 +#ifdef __APPLE__
 +#include <sys/clonefile.h>
 +#include <sys/xattr.h>
@@ -57,77 +494,165 @@ index 0000000..95b4ce7
 +#include <sys/resource.h>
 +
 +static struct worktree **donors;
-+static int initialized, enabled, trace_enabled;
++static int donor_nr, initialized, enabled, trace_enabled, diagnostic, profiling;
++static int batch_fallback, selected_workers, worker_budget = 8;
++static int batch_workers, has_sources;
++static uintmax_t checkout_entries;
 +static mode_t checkout_umask;
-+static uintmax_t attempted, cloned_files, cloned_bytes, batches;
-+static int batch_workers;
++static uintmax_t attempted, cloned_files, cloned_bytes, batches, cache_hits;
++static uint64_t object_ns, verify_ns, clone_ns, publish_ns, batch_ns, donor_probes;
++static const char *reason_names[] = { "disabled", "conversion", "file_type", "prefix",
++	"object_unavailable", "empty", "size_limit", "no_matching_donor", "donor_missing",
++	"donor_metadata", "donor_mismatch", "donor_changed", "clone_error", "publish_error" };
++static uint64_t reasons[ARRAY_SIZE(reason_names)];
++
 +struct donor_directory {
 +	int fd;
 +	const char *root;
 +	char *path;
 +	size_t len;
++	int preferred;
 +};
-+
 +static struct donor_directory main_source_dir = { .fd = -1 };
++static void initialize(void);
 +
++static uint64_t stamp(void) { return profiling ? getnanotime() : 0; }
++static void measure(uint64_t *counter, uint64_t start)
++{
++	if (profiling) __atomic_fetch_add(counter, getnanotime() - start, __ATOMIC_RELAXED);
++}
++static void reject(const char *reason)
++{
++	size_t i;
++	if (!diagnostic) return;
++	for (i = 0; i < ARRAY_SIZE(reason_names); i++)
++		if (!strcmp(reason, reason_names[i])) {
++			__atomic_fetch_add(&reasons[i], 1, __ATOMIC_RELAXED);
++			return;
++		}
++}
 +static void clear_donor_directory(struct donor_directory *cache)
 +{
-+	if (cache->fd >= 0)
-+		close(cache->fd);
++	if (cache->fd >= 0) close(cache->fd);
 +	free(cache->path);
 +	cache->fd = -1;
 +	cache->path = NULL;
 +}
 +
++static void write_diagnostics(FILE *out, const char *event)
++{
++	struct json_writer jw = JSON_WRITER_INIT;
++	struct apfs_cache_stats cache;
++	size_t i;
++	apfs_cache_stats(&cache, 1);
++	jw_object_begin(&jw, 0);
++	jw_object_string(&jw, "event", event);
++	jw_object_intmax(&jw, "schema_version", 1);
++	jw_object_bool(&jw, "clone_enabled", enabled);
++	jw_object_intmax(&jw, "registered_worktrees", donor_nr);
++	jw_object_intmax(&jw, "process_id", getpid());
++	jw_object_intmax(&jw, "checkout_entries", checkout_entries);
++	jw_object_intmax(&jw, "attempted", attempted);
++	jw_object_intmax(&jw, "cloned", cloned_files);
++	jw_object_intmax(&jw, "cloned_bytes", cloned_bytes);
++	jw_object_intmax(&jw, "donor_probes", donor_probes);
++	jw_object_inline_begin_object(&jw, "rejection_events");
++	for (i = 0; i < ARRAY_SIZE(reason_names); i++) jw_object_intmax(&jw, reason_names[i], reasons[i]);
++	jw_end(&jw);
++	jw_object_inline_begin_object(&jw, "workers");
++	jw_object_intmax(&jw, "auxiliary_budget", worker_budget);
++	jw_object_intmax(&jw, "selected", selected_workers ? selected_workers : 1);
++	jw_object_intmax(&jw, "batches", batches);
++	jw_object_intmax(&jw, "batch_peak", batch_workers);
++	jw_end(&jw);
++	jw_object_inline_begin_object(&jw, "cache");
++	jw_object_intmax(&jw, "limit_bytes", cache.limit);
++	jw_object_bool(&jw, "fsmonitor_stat_guard", enabled || cache.limit != 0);
++	jw_object_intmax(&jw, "charged_file_bytes", cache.charged_bytes);
++	jw_object_intmax(&jw, "directory_allocated_bytes", cache.directory_bytes);
++	jw_object_intmax(&jw, "entries", cache.entries);
++	jw_object_intmax(&jw, "stored", cache.stored);
++	jw_object_intmax(&jw, "evicted", cache.evicted);
++	jw_object_intmax(&jw, "hits", cache_hits);
++	jw_object_bool(&jw, "available", cache.available);
++	jw_object_bool(&jw, "writer_busy", cache.writer_busy);
++	jw_end(&jw);
++	jw_object_inline_begin_object(&jw, "work_ns");
++	jw_object_intmax(&jw, "object_lookup", object_ns);
++	jw_object_intmax(&jw, "donor_verify", verify_ns);
++	jw_object_intmax(&jw, "clone", clone_ns);
++	jw_object_intmax(&jw, "publication", publish_ns);
++	jw_object_intmax(&jw, "batch_wall", batch_ns);
++	jw_end(&jw);
++	jw_end(&jw);
++	fprintf(out, "%s\n", jw.json.buf);
++	jw_release(&jw);
++}
 +static void report_clones(void)
 +{
-+	if (trace_enabled)
-+		fprintf(stderr, "git-apfs: attempted=%"PRIuMAX" cloned=%"PRIuMAX" bytes=%"PRIuMAX"\n",
-+			attempted, cloned_files, cloned_bytes);
-+	if (trace_enabled && batches)
-+		fprintf(stderr, "git-apfs-batch: batches=%"PRIuMAX" workers=%d\n",
-+			batches, batch_workers);
++	if (trace_enabled) fprintf(stderr, "git-apfs: attempted=%"PRIuMAX" cloned=%"PRIuMAX" bytes=%"PRIuMAX"\n", attempted, cloned_files, cloned_bytes);
++	if (trace_enabled && batches) fprintf(stderr, "git-apfs-batch: batches=%"PRIuMAX" workers=%d\n", batches, batch_workers);
++	if (diagnostic) write_diagnostics(stderr, "git-apfs-checkout");
 +	clear_donor_directory(&main_source_dir);
-+	free_worktrees(donors);
++	if (donors) free_worktrees(donors);
 +}
-+
 +static void initialize(void)
 +{
-+	if (!initialized) {
-+		initialized = 1;
-+		enabled = 1;
-+		git_config_get_bool("apfs.clonecheckout", &enabled);
-+		enabled = git_env_bool("GIT_APFS_CLONE_CHECKOUT", enabled);
-+		trace_enabled = git_env_bool("GIT_APFS_TRACE", 0);
-+		checkout_umask = umask(0);
-+		umask(checkout_umask);
-+		if (enabled) {
-+			donors = get_worktrees_without_reading_head();
-+			atexit(report_clones);
-+		}
++	if (initialized) return;
++	initialized = 1;
++	enabled = 1;
++	repo_config_get_bool(the_repository, "apfs.clonecheckout", &enabled);
++	enabled = git_env_bool("GIT_APFS_CLONE_CHECKOUT", enabled);
++	trace_enabled = git_env_bool("GIT_APFS_TRACE", 0);
++	diagnostic = git_env_bool("GIT_APFS_TRACE_JSON", 0);
++	profiling = git_env_bool("GIT_APFS_PROFILE", 0);
++	diagnostic |= profiling;
++	repo_config_get_int(the_repository, "apfs.workerbudget", &worker_budget);
++	if (worker_budget < 0 || worker_budget > 64) die("apfs.workerBudget must be between 0 and 64");
++	checkout_umask = umask(0);
++	umask(checkout_umask);
++	apfs_cache_init(the_repository);
++	if (enabled) {
++		donors = get_worktrees_without_reading_head(the_repository);
++		while (donors[donor_nr]) donor_nr++;
 +	}
++	atexit(report_clones);
 +}
 +
-+/* Keep native settings outside eligible APFS worktree repositories. Explicit
-+ * checkout.workers and threshold settings always take precedence. */
 +int apfs_checkout_default_workers(void)
 +{
 +	struct statfs fs;
 +	struct stat current, donor;
-+	int i;
-+
++	struct apfs_cache_stats cache;
++	int i, eligible = 0, wanted;
 +	initialize();
-+	if (!enabled || !donors || statfs(".", &fs) ||
-+	    strcmp(fs.f_fstypename, "apfs") || stat(".", &current))
-+		return 1;
-+	for (i = 0; donors[i]; i++) {
++
++	if (!enabled || statfs(".", &fs) || strcmp(fs.f_fstypename, "apfs") || stat(".", &current)) return 1;
++	apfs_cache_stats(&cache, 0);
++	eligible = cache.limit && cache.available;
++	for (i = 0; !eligible && i < donor_nr; i++)
 +		if (!donors[i]->is_current && !donors[i]->is_bare &&
-+		    !lstat(donors[i]->path, &donor) && S_ISDIR(donor.st_mode) &&
-+		    donor.st_dev == current.st_dev)
-+			return online_cpus() < 8 ? online_cpus() : 8;
-+	}
-+	return 1;
++		    !lstat(donors[i]->path, &donor) && S_ISDIR(donor.st_mode) && donor.st_dev == current.st_dev) eligible = 1;
++	has_sources = eligible;
++	if (!eligible || !worker_budget) return 1;
++	wanted = online_cpus() < 8 ? online_cpus() : 8;
++	return wanted;
 +}
++
++int apfs_checkout_large_batch(struct parallel_checkout_item *items, size_t nr)
++{
++	size_t i, bytes = 0, size;
++	int explicit_threshold;
++	initialize();
++	if (nr < 2 || !enabled || !repo_config_get_int(the_repository, "checkout.thresholdForParallelism", &explicit_threshold)) return 0;
++	for (i = 0; i < nr; i++) {
++		if (convert_attrs_preserve_bytes(&items[i].ca) &&
++		    odb_read_object_info(the_repository->objects, &items[i].ce->oid, &size) == OBJ_BLOB && size <= 64 * 1024 * 1024) bytes += size;
++		if (bytes >= 8 * 1024 * 1024) return 1;
++	}
++	return 0;
++}
++void apfs_checkout_finish_batch(void) { batch_fallback = 0; }
 +
 +static int unchanged(const struct stat *a, const struct stat *b)
 +{
@@ -208,175 +733,77 @@ index 0000000..95b4ce7
 +	return fd;
 +}
 +
-+static int matches_blob(int fd, const char *expected, size_t size)
-+{
-+	char buffer[65536];
-+	size_t offset = 0;
-+	while (offset < size) {
-+		size_t wanted = size - offset;
-+		ssize_t got;
-+		if (wanted > sizeof(buffer))
-+			wanted = sizeof(buffer);
-+		got = read_in_full(fd, buffer, wanted);
-+		if (got != wanted || memcmp(buffer, expected + offset, wanted))
-+			return 0;
-+		offset += wanted;
-+	}
-+	return 1;
-+}
-+
-+/* For small files, use Git's canonical blob identity without decompressing
-+ * the expected object body again. Object type/size are checked separately;
-+ * replacement objects and the repository hash algorithm are respected. */
-+static int matches_small_blob(int fd, size_t size, const struct object_id *oid,
-+			      const struct git_hash_algo *algo)
++static int matches_blob_oid(int fd, size_t size, const struct object_id *oid,
++			    const struct git_hash_algo *algo)
 +{
 +	struct git_hash_ctx ctx;
 +	struct object_id actual;
 +	char header[32], buffer[65536];
++	size_t offset = 0;
 +	int len = format_object_header(header, sizeof(header), OBJ_BLOB, size);
-+
-+	algo->init_fn(&ctx);
++	git_hash_init(&ctx, algo);
 +	git_hash_update(&ctx, header, len);
-+	if (read_in_full(fd, buffer, size) != size)
-+		return 0;
-+	git_hash_update(&ctx, buffer, size);
++	while (offset < size) {
++		size_t wanted = size - offset;
++		if (wanted > sizeof(buffer)) wanted = sizeof(buffer);
++		if (read_in_full(fd, buffer, wanted) != (ssize_t)wanted) { git_hash_discard(&ctx); return 0; }
++		git_hash_update(&ctx, buffer, wanted);
++		offset += wanted;
++	}
 +	git_hash_final_oid(&actual, &ctx);
 +	return oideq(&actual, oid);
 +}
-+
 +struct clone_plan {
-+	int small_task;
-+	const char *path;
++	const char *path, *name;
 +	struct object_id expected_oid;
 +	const struct git_hash_algo *hash_algo;
-+	int source, parent;
-+	const char *name;
++	int source, parent, from_cache, result, saved_errno;
 +	struct stat before, st;
 +	size_t size;
 +	mode_t mode;
 +	char temporary[96];
-+	int result, saved_errno;
 +};
 +
-+static int prepare_clone(const struct cache_entry *ce, const char *path,
-+		       const struct conv_attrs *ca,
-+		       const struct checkout *state, struct clone_plan *plan)
++static int prepare_plan(const struct cache_entry *ce, const char *path,
++			const struct conv_attrs *ca, const struct checkout *state, struct clone_plan *plan)
 +{
-+	struct stat before, after;
-+	const char *name;
-+	char *blob = NULL;
-+	size_t size = 0;
-+	int parent = -1, i, object_checked = 0;
-+
-+	plan->small_task = 0;
-+	/* Git retains responsibility for conversions, filters, links and prefixes. */
-+	if (!ca || ca->drv || ca->ident || ca->working_tree_encoding ||
-+	    ca->crlf_action != CRLF_BINARY || state->base_dir_len ||
-+	    strcmp(path, ce->name) || !S_ISREG(ce->ce_mode))
-+		return 0;
++	size_t size;
++	uint64_t nonce[2], start;
 +	initialize();
-+	if (!enabled || !donors)
-+		return 0;
++	checkout_entries++;
++	if (!enabled) { reject("disabled"); return 0; }
++	if (!S_ISREG(ce->ce_mode)) { reject("file_type"); return 0; }
++	if (state->base_dir_len || strcmp(path, ce->name)) { reject("prefix"); return 0; }
++	if (!convert_attrs_preserve_bytes(ca)) { reject("conversion"); return 0; }
 +	attempted++;
-+	for (i = 0; donors[i]; i++) {
-+		const char *source_name;
-+		int source_parent, source;
-+		/* The bytes, not donor HEAD/index metadata, establish correctness.
-+		 * Avoid re-reading commit/tree objects for every checkout entry. */
-+		if (donors[i]->is_current || donors[i]->is_bare)
-+			continue;
-+		source_parent = donor_parent_fd(&main_source_dir, donors[i]->path, ce->name, &source_name);
-+		if (source_parent < 0)
-+			continue;
-+		source = openat(source_parent, source_name,
-+				O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
-+		if (source < 0)
-+			continue;
-+		if (fstat(source, &before) || !S_ISREG(before.st_mode) ||
-+		    before.st_flags || !(before.st_mode & S_IRUSR) || before.st_size <= 0 ||
-+		    before.st_size > 64 * 1024 * 1024 ||
-+		    flistxattr(source, NULL, 0, 0) != 0) {
-+			close(source);
-+			continue;
-+		}
-+		if (!object_checked) {
-+			unsigned long object_size;
-+			if (oid_object_info(the_repository, &ce->oid, &object_size) != OBJ_BLOB ||
-+			    object_size > 64 * 1024 * 1024) {
-+				close(source);
-+				break;
-+			}
-+			object_checked = 1;
-+			size = object_size;
-+		}
-+		if (before.st_size != size) {
-+			close(source);
-+			continue;
-+		}
-+		if (size <= 65536) {
-+			if (!matches_small_blob(source, size,
-+				lookup_replace_object(the_repository, &ce->oid),
-+				the_repository->hash_algo)) {
-+				close(source);
-+				continue;
-+			}
-+		} else {
-+			if (!blob)
-+				blob = read_blob_entry(ce, &size);
-+			if (!blob) {
-+				close(source);
-+				break;
-+			}
-+			if (before.st_size != size || !matches_blob(source, blob, size)) {
-+				close(source);
-+				continue;
-+			}
-+		}
-+		if (fstat(source, &after) || !unchanged(&before, &after)) {
-+			close(source);
-+			continue;
-+		}
-+		if (parent < 0)
-+			parent = parent_fd(".", path, &name);
-+		if (parent < 0) {
-+			close(source);
-+			break;
-+		}
-+		plan->source = source;
-+		plan->parent = parent;
-+		plan->name = name;
-+		plan->before = before;
-+		plan->size = size;
-+		plan->mode = ((ce->ce_mode & 0100) ? 0777 : 0666) & ~checkout_umask;
-+		{
-+			uint64_t nonce[2];
-+			if (csprng_bytes(nonce, sizeof(nonce), 0) < 0) {
-+				close(source);
-+				break;
-+			}
-+			xsnprintf(plan->temporary, sizeof(plan->temporary),
-+				  ".git-apfs-%"PRIx64"-%"PRIx64, nonce[0], nonce[1]);
-+		}
-+		free(blob);
-+		return 1;
-+	}
-+	if (parent >= 0)
-+		close(parent);
-+	free(blob);
-+	return 0;
++	start = stamp();
++	if (odb_read_object_info(the_repository->objects, &ce->oid, &size) != OBJ_BLOB) { reject("object_unavailable"); return 0; }
++	measure(&object_ns, start);
++	if (!size) { reject("empty"); return 0; }
++	if (size > 64 * 1024 * 1024) { reject("size_limit"); return 0; }
++	if (csprng_bytes(nonce, sizeof(nonce), 0) < 0) return 0;
++	memset(plan, 0, sizeof(*plan));
++	plan->path = path;
++	plan->size = size;
++	plan->mode = ((ce->ce_mode & 0100) ? 0777 : 0666) & ~checkout_umask;
++	plan->hash_algo = the_repository->hash_algo;
++	oidcpy(&plan->expected_oid, lookup_replace_object(the_repository, &ce->oid));
++	xsnprintf(plan->temporary, sizeof(plan->temporary), ".git-apfs-%"PRIx64"-%"PRIx64, nonce[0], nonce[1]);
++	return 1;
 +}
-+
-+/* Descriptor operations and independent hash contexts run in threads. Git's object
-+ * store, configuration, index and trace counters stay on the main thread. */
 +static void execute_clone(struct clone_plan *plan)
 +{
 +	struct stat created, current, after;
 +	int output = -1, published = 0, have_created = 0;
++	uint64_t started = stamp();
 +
 +	plan->result = 0;
-+	if (fclonefileat(plan->source, plan->parent, plan->temporary, CLONE_NOOWNERCOPY))
++	if (fclonefileat(plan->source, plan->parent, plan->temporary, CLONE_NOOWNERCOPY)) {
++		reject("clone_error");
 +		goto out;
++	}
++	measure(&clone_ns, started);
++	started = stamp();
 +	have_created = !fstatat(plan->parent, plan->temporary, &created, AT_SYMLINK_NOFOLLOW);
 +	output = openat(plan->parent, plan->temporary, O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
 +	if (have_created && output >= 0 && !fstat(output, &current) &&
@@ -391,9 +818,11 @@ index 0000000..95b4ce7
 +				fcntl(output, F_RDADVISE, &advice);
 +			}
 +			plan->result = 1;
++			measure(&publish_ns, started);
 +		} else {
 +			/* Never retry a write after publishing its output. */
 +			plan->result = -1;
++			reject("publish_error");
 +			plan->saved_errno = errno;
 +		}
 +	}
@@ -408,101 +837,100 @@ index 0000000..95b4ce7
 +	close(plan->parent);
 +}
 +
-+/* This preflight touches Git metadata only on the caller. Filesystem reads,
-+ * hash contexts and clone descriptors are independent for each worker. */
-+static int prepare_small_task(const struct cache_entry *ce,
-+			      const struct conv_attrs *ca,
-+			      const struct checkout *state, struct clone_plan *plan)
-+{
-+	unsigned long size;
-+	uint64_t nonce[2];
-+
-+	if (!ca || ca->drv || ca->ident || ca->working_tree_encoding ||
-+	    ca->crlf_action != CRLF_BINARY || state->base_dir_len ||
-+	    !S_ISREG(ce->ce_mode) ||
-+	    oid_object_info(the_repository, &ce->oid, &size) != OBJ_BLOB ||
-+	    !size || size > 65536 || csprng_bytes(nonce, sizeof(nonce), 0) < 0)
-+		return 0;
-+	plan->small_task = 1;
-+	plan->path = ce->name;
-+	plan->size = size;
-+	plan->mode = ((ce->ce_mode & 0100) ? 0777 : 0666) & ~checkout_umask;
-+	plan->hash_algo = the_repository->hash_algo;
-+	oidcpy(&plan->expected_oid, lookup_replace_object(the_repository, &ce->oid));
-+	xsnprintf(plan->temporary, sizeof(plan->temporary),
-+		  ".git-apfs-%"PRIx64"-%"PRIx64, nonce[0], nonce[1]);
-+	attempted++;
-+	return 1;
-+}
-+
 +static void execute_plan(struct clone_plan *plan, struct donor_directory *cache)
 +{
-+	int i;
-+
-+	if (!plan->small_task) {
-+		execute_clone(plan);
-+		return;
-+	}
++	int rank;
 +	plan->result = 0;
-+	for (i = 0; donors[i]; i++) {
++	/* Cache is addressed by immutable blob identity; every opened file is still
++	 * independently verified. Worktree preference is only a search-order hint. */
++	for (rank = -1; rank < donor_nr; rank++) {
 +		const char *source_name;
 +		struct stat before, after;
-+		int parent, source;
-+
-+		if (donors[i]->is_current || donors[i]->is_bare)
-+			continue;
-+		parent = donor_parent_fd(cache, donors[i]->path, plan->path, &source_name);
-+		if (parent < 0)
-+			continue;
-+		source = openat(parent, source_name, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
-+		if (source < 0)
-+			continue;
-+		if (fstat(source, &before) || !S_ISREG(before.st_mode) ||
-+		    before.st_flags || !(before.st_mode & S_IRUSR) ||
-+		    before.st_size != plan->size || flistxattr(source, NULL, 0, 0) != 0 ||
-+		    !matches_small_blob(source, plan->size, &plan->expected_oid, plan->hash_algo) ||
-+		    fstat(source, &after) || !unchanged(&before, &after)) {
-+			close(source);
-+			continue;
++		int parent, source, i = -1;
++		uint64_t start;
++		if (rank < 0) {
++			source = apfs_cache_open(&plan->expected_oid);
++			if (source < 0) continue;
++		} else {
++			int preferred = cache->preferred < donor_nr ? cache->preferred : 0;
++			i = !rank ? preferred : (rank <= preferred ? rank - 1 : rank);
++			if (donors[i]->is_current || donors[i]->is_bare) continue;
++			if (diagnostic) __atomic_fetch_add(&donor_probes, 1, __ATOMIC_RELAXED);
++			parent = donor_parent_fd(cache, donors[i]->path, plan->path, &source_name);
++			if (parent < 0) { reject("donor_missing"); continue; }
++			source = openat(parent, source_name, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
++			if (source < 0) { reject("donor_missing"); continue; }
 +		}
++		start = stamp();
++		if (fstat(source, &before) || !S_ISREG(before.st_mode) || before.st_flags ||
++		    !(before.st_mode & S_IRUSR) || (uintmax_t)before.st_size != plan->size || flistxattr(source, NULL, 0, 0) != 0) {
++			reject("donor_metadata"); close(source); continue;
++		}
++		if (!matches_blob_oid(source, plan->size, &plan->expected_oid, plan->hash_algo)) {
++			reject("donor_mismatch"); close(source); continue;
++		}
++		if (fstat(source, &after) || !unchanged(&before, &after)) {
++			reject("donor_changed"); close(source); continue;
++		}
++		measure(&verify_ns, start);
 +		parent = parent_fd(".", plan->path, &plan->name);
-+		if (parent < 0) {
-+			close(source);
-+			return;
-+		}
++		if (parent < 0) { close(source); break; }
 +		plan->source = source;
 +		plan->parent = parent;
 +		plan->before = before;
++		plan->from_cache = rank < 0;
 +		execute_clone(plan);
-+		if (plan->result)
++		if (plan->result) {
++			if (plan->result > 0 && i >= 0) cache->preferred = i;
 +			return;
++		}
 +	}
++	reject("no_matching_donor");
 +}
-+
 +static void count_clone(const struct clone_plan *plan)
 +{
 +	if (plan->result > 0) {
 +		cloned_files++;
 +		cloned_bytes += plan->size;
++		if (plan->from_cache) cache_hits++;
 +	}
 +}
-+
 +int apfs_checkout_clone(const struct cache_entry *ce, const char *path,
-+		       const struct conv_attrs *ca,
-+		       const struct checkout *state, struct stat *st)
++		       const struct conv_attrs *ca, const struct checkout *state, struct stat *st)
 +{
 +	struct clone_plan plan;
-+	if (!prepare_clone(ce, path, ca, state, &plan))
-+		return 0;
-+	execute_clone(&plan);
++	if (batch_fallback || !prepare_plan(ce, path, ca, state, &plan)) return 0;
++	execute_plan(&plan, &main_source_dir);
 +	count_clone(&plan);
-+	if (plan.result > 0)
-+		*st = plan.st;
-+	else if (plan.result < 0)
-+		errno = plan.saved_errno;
++	if (plan.result > 0) *st = plan.st;
++	else if (plan.result < 0) errno = plan.saved_errno;
 +	return plan.result;
 +}
-+
++void apfs_checkout_cache_entry(const struct checkout *state, const struct cache_entry *ce)
++{
++	struct apfs_cache_stats stats;
++	struct conv_attrs ca;
++	struct stat st;
++	struct object_id oid;
++	const char *name;
++	int parent, fd;
++	unsigned long configured_limit = 0;
++	if (!state->istate || repo_config_get_ulong(state->istate->repo, "apfs.cachelimit", &configured_limit) || !configured_limit) return;
++	initialize();
++	apfs_cache_stats(&stats, 0);
++	if (!enabled || !stats.limit || state->base_dir_len || !S_ISREG(ce->ce_mode)) return;
++	convert_attrs(state->istate, &ca, ce->name);
++	if (!convert_attrs_preserve_bytes(&ca)) return;
++	parent = parent_fd(".", ce->name, &name);
++	if (parent < 0) return;
++	fd = openat(parent, name, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
++	close(parent);
++	if (fd < 0) return;
++	oidcpy(&oid, lookup_replace_object(the_repository, &ce->oid));
++	if (!fstat(fd, &st) && S_ISREG(st.st_mode) && st.st_size > 0 && st.st_size <= 64 * 1024 * 1024 && !st.st_flags &&
++	    flistxattr(fd, NULL, 0, 0) == 0) apfs_cache_store(&oid, fd);
++	close(fd);
++}
 +#ifndef NO_PTHREADS
 +#define APFS_BATCH_SIZE 256
 +#define APFS_MAX_WORKERS 8
@@ -546,11 +974,13 @@ index 0000000..95b4ce7
 +#ifndef NO_PTHREADS
 +	size_t pos;
 +	struct rlimit limit;
-+	int capacity = APFS_BATCH_SIZE, handled = 0;
++	int capacity = APFS_BATCH_SIZE, handled = 0, explicit_workers, leased = 0;
++	uint64_t started = stamp();
 +
 +	initialize();
-+	if (state->base_dir_len || apfs_checkout_default_workers() <= 1)
-+		return 0;
++	if (state->base_dir_len || !enabled) return 0;
++	apfs_checkout_default_workers();
++	if (!has_sources) return 0;
 +	if (workers > APFS_MAX_WORKERS)
 +		return 0;
 +	if (!getrlimit(RLIMIT_NOFILE, &limit) && limit.rlim_cur != RLIM_INFINITY) {
@@ -561,6 +991,13 @@ index 0000000..95b4ce7
 +		if (!capacity)
 +			return 0;
 +	}
++	if (repo_config_get_int(the_repository, "checkout.workers", &explicit_workers) &&
++	    !getenv("GIT_TEST_CHECKOUT_WORKERS")) {
++		leased = apfs_budget_acquire(the_repository, workers - 1, worker_budget);
++		workers = 1 + leased;
++	}
++	selected_workers = workers;
++	if (diagnostic && leased) fprintf(stderr, "{\"event\":\"git-apfs-worker-lease\",\"process_id\":%d,\"at_ns\":%"PRIu64",\"delta\":%d}\n", getpid(), getnanotime(), leased);
 +	/* Bound pinned descriptors, including on systems with low RLIMIT_NOFILE.
 +	 * Object reads and all preparation remain serial and bounded per file. */
 +	for (pos = 0; pos < nr; ) {
@@ -583,9 +1020,7 @@ index 0000000..95b4ce7
 +		}
 +		for (; pos < nr && count < capacity; pos++) {
 +			struct parallel_checkout_item *item = &items[pos];
-+			if (!prepare_small_task(item->ce, &item->ca, state, &plans[count]) &&
-+			    !prepare_clone(item->ce, item->ce->name, &item->ca,
-+					   state, &plans[count]))
++			if (!prepare_plan(item->ce, item->ce->name, &item->ca, state, &plans[count]))
 +				continue;
 +			prepared[count++] = item;
 +			if (count == 1) {
@@ -628,40 +1063,80 @@ index 0000000..95b4ce7
 +			}
 +		}
 +	}
++	measure(&batch_ns, started);
++	if (diagnostic && leased) fprintf(stderr, "{\"event\":\"git-apfs-worker-lease\",\"process_id\":%d,\"at_ns\":%"PRIu64",\"delta\":%d}\n", getpid(), getnanotime(), -leased);
++	apfs_budget_release();
++	/* Auto policy keeps native fallbacks serial instead of spawning an
++	 * unbudgeted process pool. Explicit worker settings retain Git behavior. */
++	handled |= selected_workers == workers && repo_config_get_int(the_repository, "checkout.workers", &explicit_workers);
++	batch_fallback = handled;
 +	return handled;
 +#else
 +	return 0;
 +#endif
 +}
++int apfs_command(int argc, const char **argv, const char *prefix, struct repository *repo)
++{
++	int i;
++	struct checkout state = CHECKOUT_INIT;
++	(void)prefix;
++	repo_config(repo, git_default_config, NULL);
++	initialize();
++	if (argc == 2 && (!strcmp(argv[1], "status") || !strcmp(argv[1], "doctor"))) {
++		write_diagnostics(stdout, "git-apfs-status");
++		return 0;
++	}
++	if (argc == 2 && !strcmp(argv[1], "tune")) {
++		repo_config_set(repo, "core.fsmonitor", "true");
++		repo_config_set(repo, "core.untrackedCache", "true");
++		puts("Enabled FSMonitor and untracked-cache configuration. With APFS cloning or a donor cache enabled, FSMonitor is bypassed for safe stat validation.");
++		return 0;
++	}
++	if (argc == 3 && !strcmp(argv[1], "cache") && !strcmp(argv[2], "status")) {
++		write_diagnostics(stdout, "git-apfs-cache"); return 0;
++	}
++	if (argc == 3 && !strcmp(argv[1], "cache") && !strcmp(argv[2], "prune"))
++		return apfs_cache_prune() ? error("cache unavailable or busy") : 0;
++	if (argc == 3 && !strcmp(argv[1], "cache") && !strcmp(argv[2], "warm")) {
++		struct apfs_cache_stats cache;
++		if (!repo_get_work_tree(repo)) return error("cache warm requires a worktree");
++		setup_work_tree(repo);
++		apfs_cache_stats(&cache, 0);
++		if (!cache.limit) return error("set apfs.cacheLimit to a positive byte budget before warming");
++		if (repo_read_index(repo) < 0) return error("unable to read index");
++		state.istate = repo->index;
++		for (i = 0; i < repo->index->cache_nr; i++)
++			if (!ce_stage(repo->index->cache[i]) && !(repo->index->cache[i]->ce_flags & CE_SKIP_WORKTREE))
++				apfs_checkout_cache_entry(&state, repo->index->cache[i]);
++		write_diagnostics(stdout, "git-apfs-cache-warm");
++		return 0;
++	}
++	return error("usage: git apfs {status|doctor|tune|cache {status|warm|prune}}");
++}
 +
 +#else
-+int apfs_checkout_batch(struct parallel_checkout_item *items, size_t nr,
-+			const struct checkout *state, int workers)
++int apfs_checkout_default_workers(void) { return 1; }
++int apfs_checkout_large_batch(struct parallel_checkout_item *i UNUSED, size_t n UNUSED) { return 0; }
++void apfs_checkout_finish_batch(void) { }
++void apfs_checkout_cache_entry(const struct checkout *s UNUSED, const struct cache_entry *ce UNUSED) { }
++int apfs_checkout_batch(struct parallel_checkout_item *i UNUSED, size_t n UNUSED, const struct checkout *s UNUSED, int w UNUSED) { return 0; }
++int apfs_checkout_clone(const struct cache_entry *ce UNUSED, const char *p UNUSED, const struct conv_attrs *ca UNUSED, const struct checkout *s UNUSED, struct stat *st UNUSED) { return 0; }
++int apfs_command(int argc UNUSED, const char **argv UNUSED, const char *prefix UNUSED, struct repository *repo UNUSED)
 +{
-+	return 0;
-+}
-+
-+int apfs_checkout_default_workers(void)
-+{
-+	return 1;
-+}
-+
-+int apfs_checkout_clone(const struct cache_entry *ce, const char *path,
-+		       const struct conv_attrs *ca,
-+		       const struct checkout *state, struct stat *st)
-+{
-+	return 0;
++	return error("git apfs currently requires macOS APFS");
 +}
 +#endif
 diff --git a/apfs-checkout.h b/apfs-checkout.h
 new file mode 100644
-index 0000000..a0cfc27
+index 0000000000..d07bdb9ed1
 --- /dev/null
 +++ b/apfs-checkout.h
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,23 @@
 +#ifndef APFS_CHECKOUT_H
 +#define APFS_CHECKOUT_H
 +
++struct repository;
++int apfs_command(int, const char **, const char *, struct repository *);
 +struct cache_entry;
 +struct conv_attrs;
 +struct checkout;
@@ -669,6 +1144,9 @@ index 0000000..a0cfc27
 +struct parallel_checkout_item;
 +
 +int apfs_checkout_default_workers(void);
++int apfs_checkout_large_batch(struct parallel_checkout_item *, size_t);
++void apfs_checkout_finish_batch(void);
++void apfs_checkout_cache_entry(const struct checkout *, const struct cache_entry *);
 +int apfs_checkout_batch(struct parallel_checkout_item *items, size_t nr,
 +			const struct checkout *state, int workers);
 +
@@ -677,8 +1155,100 @@ index 0000000..a0cfc27
 +		       const struct conv_attrs *ca,
 +		       const struct checkout *state, struct stat *st);
 +#endif
+diff --git a/builtin.h b/builtin.h
+index 4e47a4ebd3..a24d131b65 100644
+--- a/builtin.h
++++ b/builtin.h
+@@ -139,6 +139,7 @@ int is_builtin(const char *s);
+ 		BUG("unexpected prefix in builtin: %s", (prefix)); \
+ } while (0)
+ 
++int cmd_apfs(int argc, const char **argv, const char *prefix, struct repository *repo);
+ int cmd_add(int argc, const char **argv, const char *prefix, struct repository *repo);
+ int cmd_am(int argc, const char **argv, const char *prefix, struct repository *repo);
+ int cmd_annotate(int argc, const char **argv, const char *prefix, struct repository *repo);
+diff --git a/builtin/apfs.c b/builtin/apfs.c
+new file mode 100644
+index 0000000000..4f99faef00
+--- /dev/null
++++ b/builtin/apfs.c
+@@ -0,0 +1,9 @@
++#include "git-compat-util.h"
++#include "builtin.h"
++#include "apfs-checkout.h"
++
++int cmd_apfs(int argc, const char **argv, const char *prefix, struct repository *repo)
++{
++	show_usage_if_asked(argc, argv, "git apfs {status|doctor|tune|cache {status|warm|prune}}");
++	return apfs_command(argc, argv, prefix, repo);
++}
+diff --git a/builtin/worktree.c b/builtin/worktree.c
+index 77ecd0f71f..2471e041a9 100644
+--- a/builtin/worktree.c
++++ b/builtin/worktree.c
+@@ -535,13 +535,15 @@ static int add_worktree(const char *path, const char *refname,
+ 			  sb_git.buf);
+ 	junk_work_tree = xstrdup(path);
+ 
++	/* Publish the common-directory dependency before gitdir makes this
++	 * registration discoverable to concurrent worktree enumeration. */
++	strbuf_reset(&sb);
++	strbuf_addf(&sb, "%s/commondir", sb_repo.buf);
++	write_file(sb.buf, "../..");
+ 	strbuf_reset(&sb);
+ 	strbuf_addf(&sb, "%s/gitdir", sb_repo.buf);
+ 	write_worktree_linking_files(the_repository, sb_git.buf,
+ 				     sb.buf, opts->relative_paths);
+-	strbuf_reset(&sb);
+-	strbuf_addf(&sb, "%s/commondir", sb_repo.buf);
+-	write_file(sb.buf, "../..");
+ 
+ 	/*
+ 	 * Set up the ref store of the worktree and create the HEAD reference.
+diff --git a/command-list.txt b/command-list.txt
+index 63ae2a67c9..62f6aaa4db 100644
+--- a/command-list.txt
++++ b/command-list.txt
+@@ -57,6 +57,7 @@
+ git-add                                 mainporcelain           worktree
+ git-am                                  mainporcelain
+ git-annotate                            ancillaryinterrogators
++git-apfs                                ancillaryinterrogators
+ git-apply                               plumbingmanipulators            complete
+ git-archimport                          foreignscminterface
+ git-archive                             mainporcelain
+diff --git a/convert.c b/convert.c
+index 036506842c..16c4973b0a 100644
+--- a/convert.c
++++ b/convert.c
+@@ -194,6 +194,12 @@ static enum eol output_eol(enum convert_crlf_action crlf_action)
+ 	return core_eol;
+ }
+ 
++int convert_attrs_preserve_bytes(const struct conv_attrs *ca)
++{
++	return ca && !ca->drv && !ca->ident && !ca->working_tree_encoding &&
++		output_eol(ca->crlf_action) != EOL_CRLF;
++}
++
+ static void check_global_conv_flags_eol(const char *path,
+ 			    struct text_stat *old_stats, struct text_stat *new_stats,
+ 			    int conv_flags)
+diff --git a/convert.h b/convert.h
+index 0a6e4086b8..02dcb4b735 100644
+--- a/convert.h
++++ b/convert.h
+@@ -91,6 +91,8 @@ struct conv_attrs {
+ void convert_attrs(struct index_state *istate,
+ 		   struct conv_attrs *ca, const char *path);
+ 
++int convert_attrs_preserve_bytes(const struct conv_attrs *ca);
++
+ extern enum eol core_eol;
+ extern char *check_roundtrip_encoding;
+ const char *get_cached_convert_stats_ascii(struct index_state *istate,
 diff --git a/entry.c b/entry.c
-index f36ec5a..772864c 100644
+index 1c4f0f4407..2cab07c4e2 100644
 --- a/entry.c
 +++ b/entry.c
 @@ -14,6 +14,7 @@
@@ -689,7 +1259,15 @@ index f36ec5a..772864c 100644
  #include "parallel-checkout.h"
  
  static void create_directories(const char *path, int path_len,
-@@ -301,6 +302,16 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
+@@ -270,6 +271,7 @@ int finish_delayed_checkout(struct checkout *state, int show_progress)
+ void update_ce_after_write(const struct checkout *state, struct cache_entry *ce,
+ 			   struct stat *st)
+ {
++	apfs_checkout_cache_entry(state, ce);
+ 	if (state->refresh_cache) {
+ 		assert(state->istate);
+ 		fill_stat_cache_info(state->istate, ce, st);
+@@ -299,6 +301,16 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
  
  	clone_checkout_metadata(&meta, &state->meta, &ce->oid);
  
@@ -706,8 +1284,68 @@ index f36ec5a..772864c 100644
  	if (ce_mode_s_ifmt == S_IFREG) {
  		struct stream_filter *filter = get_stream_filter_ca(ca, &ce->oid);
  		if (filter &&
+diff --git a/fsmonitor-settings.c b/fsmonitor-settings.c
+index a6587a8972..039928a1cd 100644
+--- a/fsmonitor-settings.c
++++ b/fsmonitor-settings.c
+@@ -109,6 +109,22 @@ static void lookup_fsmonitor_settings(struct repository *r)
+ 	if (r->settings.fsmonitor)
+ 		return;
+ 
++#ifdef __APPLE__
++	/* Concurrent APFS clone checkouts exposed missed edits with FSEvents.
++	 * Prefer ordinary stat validation until that interaction is resolved. */
++	{
++		unsigned long cache_limit = 0;
++		int clone_enabled = 1;
++		repo_config_get_bool(r, "apfs.clonecheckout", &clone_enabled);
++		clone_enabled = git_env_bool("GIT_APFS_CLONE_CHECKOUT", clone_enabled);
++		repo_config_get_ulong(r, "apfs.cachelimit", &cache_limit);
++		if (clone_enabled || cache_limit) {
++			fsm_settings__set_disabled(r);
++			return;
++		}
++	}
++#endif
++
+ 	/*
+ 	 * Overload the existing "core.fsmonitor" config setting (which
+ 	 * has historically been either unset or a hook pathname) to
+diff --git a/git.c b/git.c
+index d7b5f88e52..6022d9a159 100644
+--- a/git.c
++++ b/git.c
+@@ -534,6 +534,7 @@ static struct cmd_struct commands[] = {
+ 	{ "add", cmd_add, RUN_SETUP | NEED_WORK_TREE },
+ 	{ "am", cmd_am, RUN_SETUP | NEED_WORK_TREE },
+ 	{ "annotate", cmd_annotate, RUN_SETUP },
++	{ "apfs", cmd_apfs, RUN_SETUP },
+ 	{ "apply", cmd_apply, RUN_SETUP_GENTLY },
+ 	{ "archive", cmd_archive, RUN_SETUP_GENTLY },
+ 	{ "backfill", cmd_backfill, RUN_SETUP },
+diff --git a/meson.build b/meson.build
+index 0a95d90d21..871ca00b9e 100644
+--- a/meson.build
++++ b/meson.build
+@@ -311,6 +311,8 @@ libgit_sources = [
+   'add-interactive.c',
+   'add-patch.c',
+   'advice.c',
++  'apfs-cache.c',
++  'apfs-checkout.c',
+   'alias.c',
+   'alloc.c',
+   'apply.c',
+@@ -600,6 +602,7 @@ libgit_sources += custom_target(
+ builtin_sources = [
+   hook_list,
+   'builtin/add.c',
++  'builtin/apfs.c',
+   'builtin/am.c',
+   'builtin/annotate.c',
+   'builtin/apply.c',
 diff --git a/parallel-checkout.c b/parallel-checkout.c
-index 57c2dca..8b9d6a1 100644
+index 0bf4bd6d4a..287bb31352 100644
 --- a/parallel-checkout.c
 +++ b/parallel-checkout.c
 @@ -4,6 +4,7 @@
@@ -729,13 +1367,13 @@ index 57c2dca..8b9d6a1 100644
 @@ -58,7 +58,7 @@ void get_parallel_checkout_configs(int *num_workers, int *threshold)
  	}
  
- 	if (git_config_get_int("checkout.workers", num_workers))
+ 	if (repo_config_get_int(the_repository, "checkout.workers", num_workers))
 -		*num_workers = DEFAULT_NUM_WORKERS;
 +		*num_workers = apfs_checkout_default_workers();
  	else if (*num_workers < 1)
  		*num_workers = online_cpus();
  
-@@ -357,6 +357,19 @@ void write_pc_item(struct parallel_checkout_item *pc_item,
+@@ -358,6 +358,19 @@ void write_pc_item(struct parallel_checkout_item *pc_item,
  		goto out;
  	}
  
@@ -755,7 +1393,7 @@ index 57c2dca..8b9d6a1 100644
  	fd = open(path.buf, O_WRONLY | O_CREAT | O_EXCL, mode);
  
  	if (fd < 0) {
-@@ -641,7 +654,8 @@ static void write_items_sequentially(struct checkout *state)
+@@ -642,7 +655,8 @@ static void write_items_sequentially(struct checkout *state)
  
  	for (i = 0; i < parallel_checkout.nr; i++) {
  		struct parallel_checkout_item *pc_item = &parallel_checkout.items[i];
@@ -765,21 +1403,51 @@ index 57c2dca..8b9d6a1 100644
  		if (pc_item->status != PC_ITEM_COLLIDED)
  			advance_progress_meter();
  	}
-@@ -664,6 +678,9 @@ int run_parallel_checkout(struct checkout *state, int num_workers, int threshold
+@@ -663,8 +677,13 @@ int run_parallel_checkout(struct checkout *state, int num_workers, int threshold
+ 	if (parallel_checkout.nr < num_workers)
+ 		num_workers = parallel_checkout.nr;
  
- 	if (num_workers <= 1 || parallel_checkout.nr < threshold) {
- 		write_items_sequentially(state);
+-	if (num_workers <= 1 || parallel_checkout.nr < threshold) {
++	if (num_workers <= 1 || (parallel_checkout.nr < threshold &&
++	    !apfs_checkout_large_batch(parallel_checkout.items, parallel_checkout.nr))) {
++		write_items_sequentially(state);
 +	} else if (apfs_checkout_batch(parallel_checkout.items, parallel_checkout.nr,
 +				       state, num_workers)) {
-+		write_items_sequentially(state);
+ 		write_items_sequentially(state);
++		apfs_checkout_finish_batch();
  	} else {
  		struct pc_worker *workers = setup_workers(state, num_workers);
  		gather_results_from_workers(workers, num_workers);
+diff --git a/read-cache.c b/read-cache.c
+index e40f290bb3..9509f459fe 100644
+--- a/read-cache.c
++++ b/read-cache.c
+@@ -9,6 +9,8 @@
+ 
+ #include "git-compat-util.h"
+ #include "config.h"
++#include "entry.h"
++#include "apfs-checkout.h"
+ #include "date.h"
+ #include "diff.h"
+ #include "diffcore.h"
+@@ -809,6 +811,11 @@ int add_to_index(struct index_state *istate, const char *path, struct stat *st,
+ 		    oideq(&alias->oid, &ce->oid) &&
+ 		    ce->ce_mode == alias->ce_mode);
+ 
++	if (!pretend && !intent_only) {
++		struct checkout cache_state = CHECKOUT_INIT;
++		cache_state.istate = istate;
++		apfs_checkout_cache_entry(&cache_state, ce);
++	}
+ 	if (pretend)
+ 		discard_cache_entry(ce);
+ 	else if (add_index_entry(istate, ce, add_option)) {
 diff --git a/t/meson.build b/t/meson.build
-index d052fc3..f4388ba 100644
+index 3ca7b27104..ffeeb20b20 100644
 --- a/t/meson.build
 +++ b/t/meson.build
-@@ -282,6 +282,7 @@ integration_tests = [
+@@ -289,6 +289,7 @@ integration_tests = [
    't2080-parallel-checkout-basics.sh',
    't2081-parallel-checkout-collisions.sh',
    't2082-parallel-checkout-attributes.sh',
@@ -789,7 +1457,7 @@ index d052fc3..f4388ba 100644
    't2102-update-index-symlinks.sh',
 diff --git a/t/t2090-apfs-checkout.sh b/t/t2090-apfs-checkout.sh
 new file mode 100755
-index 0000000..c4109c5
+index 0000000000..c29e4bd0cf
 --- /dev/null
 +++ b/t/t2090-apfs-checkout.sh
 @@ -0,0 +1,114 @@
@@ -807,7 +1475,7 @@ index 0000000..c4109c5
 +		git commit -qm probe &&
 +		GIT_APFS_CLONE_CHECKOUT=1 GIT_APFS_TRACE=1 \
 +			git worktree add --detach ../clone-target HEAD 2>../clone-probe.log &&
-+		grep "cloned=[1-9]" ../clone-probe.log
++		test_grep "cloned=[1-9]" ../clone-probe.log
 +	)
 +'
 +
@@ -829,7 +1497,7 @@ index 0000000..c4109c5
 +	echo untracked >target/note &&
 +	git -C target ls-files --stage -z >expect-index &&
 +	GIT_APFS_TRACE=1 git -C target restore -- file-1 2>trace &&
-+	grep "cloned=1 " trace &&
++	test_grep "cloned=1 " trace &&
 +	test_cmp file-1 target/file-1 &&
 +	git -C target ls-files --stage -z >actual-index &&
 +	test_cmp expect-index actual-index &&
@@ -844,7 +1512,7 @@ index 0000000..c4109c5
 +	echo wrong-donor >file-2 &&
 +	echo wrong-target >target/file-2 &&
 +	GIT_APFS_TRACE=1 git -C target restore -- file-2 2>trace &&
-+	grep "cloned=0 " trace &&
++	test_grep "cloned=0 " trace &&
 +	test_cmp expected target/file-2 &&
 +	git restore -- file-2
 +'
@@ -866,8 +1534,8 @@ index 0000000..c4109c5
 +		echo dirty >target/file-$i || return 1
 +	done &&
 +	GIT_APFS_TRACE=1 git -C target restore -- "file-*" 2>trace &&
-+	grep "cloned=150 " trace &&
-+	grep "git-apfs-batch:" trace &&
++	test_grep "cloned=150 " trace &&
++	test_grep "git-apfs-batch:" trace &&
 +	git -C target diff --exit-code -- "file-*"
 +'
 +
@@ -879,8 +1547,8 @@ index 0000000..c4109c5
 +	done &&
 +	git diff --binary -- "file-*" >donor-before &&
 +	GIT_APFS_TRACE=1 git -C target restore -- "file-*" 2>trace &&
-+	grep "cloned=0 " trace &&
-+	grep "git-apfs-batch:" trace &&
++	test_grep "cloned=0 " trace &&
++	test_grep "git-apfs-batch:" trace &&
 +	git -C target diff --exit-code -- "file-*" &&
 +	git diff --binary -- "file-*" >donor-after &&
 +	test_cmp donor-before donor-after &&
@@ -893,7 +1561,7 @@ index 0000000..c4109c5
 +		echo dirty >target/file-$i || return 1
 +	done &&
 +	GIT_APFS_TRACE=1 git -C target -c checkout.workers=1 restore -- "file-*" 2>trace &&
-+	grep "cloned=150 " trace &&
++	test_grep "cloned=150 " trace &&
 +	test_grep ! "git-apfs-batch:" trace &&
 +	git -C target diff --exit-code -- "file-*"
 +'

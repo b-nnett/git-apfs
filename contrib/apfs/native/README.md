@@ -1,156 +1,102 @@
-# Git APFS: a native Git fork
+# Native Git APFS builds and benchmarks
 
-This is a patched Git executable. `switch` and `restore` execute Git's built-in
-commands and use APFS cloning inside the checkout writer. They do not invoke a
-second Git executable or perform a post-command compaction pass.
-
-## Build and use
+Git APFS is compiled from Git v2.56.0 with an APFS checkout patch. The `git`
+executable uses Git's own built-ins; no command wrapper or post-command
+compaction is involved. The earlier Go allocator is a separate experiment.
 
 ```sh
-python3 native/build.py
+python3 native/build.py --jobs 4
 benchmark-results/git-apfs/bin/git --version
-benchmark-results/git-apfs/bin/git -C /path/to/repository switch branch-name
-benchmark-results/git-apfs/bin/git -C /path/to/repository restore -- path/to/file
+benchmark-results/git-apfs/bin/git -C /path/to/repo apfs doctor
+python3 -m unittest discover -s tests -v
 ```
 
-The build produces two local installations: `benchmark-results/git-baseline/`
-and `benchmark-results/git-apfs/`. Both use the pinned upstream commit and the
-same compiler options; only the APFS patch and version branding differ. Nothing
-changes `/usr/bin/git`, global Git configuration or the user's PATH. To use the
-fork as the `git` command in a shell, put its `bin` directory first in that
-shell's PATH. Git's helper programs are installed with it.
+`upstream.json` pins the upstream object, branding, compiler options and patch
+SHA-256. The builder exports clean source archives into private directories and
+installs matched native/APFS binaries under `benchmark-results/`. Both use
+`NO_RUST=YesPlease NO_GETTEXT=YesPlease NO_TCLTK=YesPlease`, including Git's C
+fallback without Cargo and normal CLI remote helpers. Python 3.9+, macOS developer
+tools and make are required. Build manifests record executable hashes and logs.
+System Git and global configuration are untouched.
 
-Python 3.9+, macOS developer tools and `make` are required. The matched builds
-omit gettext translations and Tcl/Tk GUI programs; CLI features including remote
-helpers remain enabled. Sources are exported from the pinned upstream object,
-patched in a private build directory and compiled. Build logs and executable
-hashes are recorded in a build manifest. `upstream.json` pins Git v2.50.1, chosen
-to match the installed Git version used in the initial experiments; this is an
-experimental fork, not a current-upstream production release.
+## Controls and eligibility
 
-## What changed
+The checkout hook accepts regular files up to 64 MiB whose conversion attributes
+preserve their bytes, including LF text. It resolves replacement objects, checks
+blob type/size and streams the canonical SHA-1/SHA-256 identity. Donors are
+opened without following symlinks and checked for identity/metadata changes.
+Private `fclonefileat` output is published exclusively, given fresh timestamps
+and fed back into normal Git index updates. Unsupported attributes/metadata and
+unavailable or changed donors use native writes. Post-publication errors fail.
+Donor search hints only affect order; every selected snapshot is verified.
 
-The patch adds an APFS checkout helper to Git's serial `write_entry` path and
-parallel-checkout writer. The existing Git code still decides which paths to
-replace, protects dirty files, selects the branch/source/index, handles deletions,
-updates index stat information and runs hooks. This also makes the optimization
-available to other callers of this checkout engine, such as `worktree add`.
+Batch capacity is capped at 256 and adapts to the file-descriptor limit. Object
+lookup/index/config work remains on the main thread. Filesystem/hash workers
+use independent contexts. Automatic worker leases share a per-repository budget
+of eight **auxiliary threads**; caller threads are additional. Set
+`apfs.workerBudget` to 0..64. Explicit `checkout.workers` overrides that budget.
+Large batches (at least two files and 8 MiB) can run below the default count
+threshold; explicit `checkout.thresholdForParallelism` wins.
 
-For an eligible regular file, the helper:
+`git apfs doctor`/`status` prints read-only JSON. `GIT_APFS_TRACE_JSON=1` adds
+per-process diagnostics to stderr, including donor rejection events (which can
+count several probes per file), cloned bytes and worker lease events.
+`GIT_APFS_PROFILE=1` adds phase durations; summed parallel work exceeds wall time.
+`GIT_APFS_CLONE_CHECKOUT=0` disables cloning and cache population.
 
-1. Finds the same path in another registered worktree. Donor HEAD/index lookups
-   are unnecessary because the bytes are checked against the exact requested blob.
-2. Opens donor ancestors and the donor file without following symlinks.
-3. Rejects special file flags/xattrs, unreadable owner modes and large files.
-4. Checks the Git blob's size before materializing its expected bytes; the current
-   fast path is bounded to 64 MiB per file.
-5. Verifies small donor files (up to 64 KiB) using Git's canonical blob hash,
-   including the blob header, repository hash algorithm and replacement-object
-   resolution. Larger files are compared byte-for-byte with the Git blob.
-   Donor identity/timestamps are checked before and after cloning.
-6. Clones the pinned donor descriptor to a random sibling name using
-   `fclonefileat`, normalizes mode for Git's umask semantics, and publishes with
-   exclusive rename. It sets fresh checkout timestamps and supplies the actual
-   output stat information back to Git's normal index update code.
-7. Issues a best-effort asynchronous read hint for cloned files.
+`git apfs tune` explicitly configures native FSMonitor and untracked cache.
+Always compare against upstream with the same settings. With APFS cloning or a positive
+`apfs.cacheLimit`, FSMonitor is bypassed for safe normal stat validation: stress
+tests exposed missed external edits with concurrent APFS checkout workloads. The
+FSEvents interaction remains unresolved; `cache.fsmonitor_stat_guard` reports the
+guard. Configuration remains intact and untracked cache still works.
 
-If no verified donor is available, the normal Git write path runs. Filters,
-encoding, ident expansion, CRLF/text transformations, symlinks, temporary checkout
-files and `checkout-index --prefix` remain on that path. A clone failure before
-publication also falls back. A failure after publication is reported as a normal
-checkout error instead of attempting to rewrite an exposed path.
+## Optional cache
 
-The helper changes no Git index formats, trust flags, ref formats or object-store
-formats. Unrelated staged/unstaged/untracked paths remain governed by Git. In
-particular, `restore --staged` does not materialize files and invokes no APFS
-checkout helper. Commits and worktree listing remain real Git built-ins.
+`apfs.cacheLimit` defaults to zero. Set a positive byte limit (k/m/g suffixes
+accepted) to retain snapshots under the private common Git directory's
+`apfs-cache/v1`. `git apfs cache warm` seeds matching tracked files; checkout and
+add also populate it. Reads reverify content. A nonblocking writer lock avoids
+competing mutation; FIFO eviction charges max(allocated file blocks, 4096) per
+entry, plus separate directory/lock metadata. Shared extents are conservatively
+charged more than once. A later writer enforces a reduced quota; `cache prune`
+removes owned entries immediately if it obtains the lock. Unknown files and
+links are preserved. Cache initialization, warm-up and post-cleanup retention
+are costs, not free savings.
 
-## Controls and observability
-
-```sh
-# Disable the checkout optimization for one command.
-GIT_APFS_CLONE_CHECKOUT=0 benchmark-results/git-apfs/bin/git restore -- file
-
-# Or configure this repository explicitly (default in the fork is enabled).
-benchmark-results/git-apfs/bin/git config apfs.cloneCheckout false
-
-# Emit per-process actual clone counts/logical bytes to stderr.
-GIT_APFS_TRACE=1 benchmark-results/git-apfs/bin/git switch branch-name
-```
-
-Trace byte counts describe cloned logical contents, not measured physical savings.
-The benchmark measures physical APFS container allocation independently.
-
-## Validation and benchmarking
+## Benchmark methodology
 
 ```sh
-python3 -m unittest discover -s tests -p test_git_core.py -v
-python3 benchmarks/checkout.py --mode latency --repeats 3
+python3 benchmarks/checkout.py --mode latency --paired --repeats 3
 python3 benchmarks/checkout.py --mode storage --repeats 3
-# Separate settled-timestamp workload; the default above runs immediately.
-python3 benchmarks/checkout.py --mode latency --repeats 3 --settle-seconds 1.1
+python3 benchmarks/checkout.py --profiles large --mode latency --paired --profile --settle-seconds 1.1
+python3 benchmarks/agents.py --source /path/to/repo --ref COMMIT --agents 1,8,32 --repeats 3
+python3 benchmarks/agents.py --source /path/to/repo --ref COMMIT --agents 1,8,32 --mode storage --repeats 1
 ```
 
-The tests compare native/fork behavior for dirty protection, carried changes,
-staging, path-limited and staged-only restore, other source commits, subdirectory
-pathspecs, filters/hooks, symlinks, executable modes/umask, binary data, Unicode and
-newline names, restored timestamps, parallel checkout and disabling the feature.
-Validation passes 20 targeted native-fork tests, 354 selected upstream tests, and
-eight new tests in Git's APFS test script. See
-[results and tradeoffs](../results.md).
+The synthetic runner isolates switch/restore and follows each with status. Four
+worktrees per variant start CoW-shared, isolating command allocation. Paired
+latency runs interleave variants in one fixture. Settled/profile runs are separate
+from normal latency measurements. The real-repository runner clones a pinned
+source into an isolated fixture, then concurrently creates, edits, diffs, stages,
+commits, dirties/restores, switches and cleans up worktrees. It checks contents,
+source isolation, final cleanliness and worker lease balance.
 
-The checkout benchmarks use the full executables directly. Both arms begin with
-identical APFS-shared worktrees, so command-specific savings are not confused with
-worktree-creation savings. Latency runs use the host filesystem; storage runs use
-fresh private APFS containers. Every run records executable hashes and actual
-clone counters and checks bytes, modes, HEAD, index semantics and source isolation.
+Six agent variants separate native/APFS, equal FSMonitor/untracked-cache tuning,
+and optional cache (whose tuned variant reports the FSMonitor guard). Warm-up
+cost is explicit. Command distributions are descriptive: commands share the
+same fixture and are not independent samples. `/usr/bin/time -l` records CPU and
+peak RSS of each timed command, excluding persistent monitor daemons. This is
+not aggregate process-tree peak RAM. First status includes daemon startup.
 
-## Current limits
+Storage runs use disposable private APFS sparse-image containers and wait for
+stable allocation readings. Source, warmed cache, retained worktrees and cleanup
+are measured; cache storage remains included after worktree removal. A 100 ms
+allocation sampler provides a peak **lower bound**, not an exact transient peak.
+`st_blocks` diagnostics are not unique physical allocation. Latency runs use the
+host filesystem with warm caches; no global cache purge is attempted. Raw JSON
+records source revisions, parameters, diagnostics, hashes and failures. Failed
+trials are retained in reports and excluded from timing summaries.
 
-A donor must be an accessible registered worktree with the exact requested bytes
-at the same path on a clone-compatible volume. Its HEAD/index can differ. There is no persistent blob cache or
-single-checkout deduplication when no donor exists. Conversion-heavy repositories and
-files over 64 MiB use native writes. Donors are mutable, so content verification
-and metadata checks are retained. Native Git index/ref locks and the
-usual requirement to avoid concurrent external writers still apply.
-
-The fork defaults to up to eight checkout workers for batches of at
-least 100 eligible entries when another registered worktree exists on the same
-APFS volume. Explicit `checkout.workers` and `checkout.thresholdForParallelism`
-settings take precedence. With clones disabled, on other filesystems, or without
-a donor worktree, native serial defaults remain. Small batches remain serial.
-For eligible batches, Git resolves object metadata and replacement identities on
-the main thread. Filesystem reads, private descriptor caches and independent
-small-file hash contexts run in bounded workers, alongside cloning. Larger-file
-byte comparisons remain on the main thread. Git object/config/index access and
-counters remain on the main thread. Batch size is capped at 256 files and reduced
-according to the file-descriptor limit.
-Native fallback and collision recovery use the existing checkout machinery.
-Command and first-status timings must be reported alongside physical space.
-This does not claim every Git command is faster or that the full upstream test
-suite has been run.
-
-`git-apfs.patch` and the Git fork are distributed under Git's GPL version 2;
-`COPYING` contains the upstream license. The pinned upstream URL and exact patch
-digest are in `upstream.json`.
-
-## Keeping the matched build current
-
-CI verifies the patched build against every tracked source file in this checkout,
-excluding the fork README, GitHub workflows and this `contrib/apfs` harness. It
-fails if core changes are missing from the reproducible patch. After staging new
-source files, regenerate from the pinned base, then refresh the digest:
-
-```sh
-base=d82adb61ba2fd11d8f2587fca1b6bd7925ce4044
-git diff --binary "$base" -- . ':!README.md' ':!README.upstream.md' ':!.github' ':!contrib/apfs' > contrib/apfs/native/git-apfs.patch
-python3 - <<'PYCODE'
-import hashlib,json
-from pathlib import Path
-root=Path('contrib/apfs/native')
-p=root/'upstream.json'
-meta=json.loads(p.read_text())
-meta['patch_sha256']=hashlib.sha256((root/'git-apfs.patch').read_bytes()).hexdigest()
-p.write_text(json.dumps(meta,indent=2)+'\n')
-PYCODE
-```
+Git APFS remains experimental; targeted tests do not replace the full upstream
+suite. See the published results for measured tradeoffs and validation counts.

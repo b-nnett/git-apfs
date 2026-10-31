@@ -1,6 +1,8 @@
 #ifndef APFS_CHECKOUT_H
 #define APFS_CHECKOUT_H
 
+struct repository;
+int apfs_command(int, const char **, const char *, struct repository *);
 struct cache_entry;
 struct conv_attrs;
 struct checkout;
@@ -8,6 +10,9 @@ struct stat;
 struct parallel_checkout_item;
 
 int apfs_checkout_default_workers(void);
+int apfs_checkout_large_batch(struct parallel_checkout_item *, size_t);
+void apfs_checkout_finish_batch(void);
+void apfs_checkout_cache_entry(const struct checkout *, const struct cache_entry *);
 int apfs_checkout_batch(struct parallel_checkout_item *items, size_t nr,
 			const struct checkout *state, int workers);
 

@@ -12,7 +12,7 @@ test_lazy_prereq APFS_CLONE '
 		git commit -qm probe &&
 		GIT_APFS_CLONE_CHECKOUT=1 GIT_APFS_TRACE=1 \
 			git worktree add --detach ../clone-target HEAD 2>../clone-probe.log &&
-		grep "cloned=[1-9]" ../clone-probe.log
+		test_grep "cloned=[1-9]" ../clone-probe.log
 	)
 '
 
@@ -34,7 +34,7 @@ test_expect_success APFS_CLONE 'path restore preserves staging and untracked fil
 	echo untracked >target/note &&
 	git -C target ls-files --stage -z >expect-index &&
 	GIT_APFS_TRACE=1 git -C target restore -- file-1 2>trace &&
-	grep "cloned=1 " trace &&
+	test_grep "cloned=1 " trace &&
 	test_cmp file-1 target/file-1 &&
 	git -C target ls-files --stage -z >actual-index &&
 	test_cmp expect-index actual-index &&
@@ -49,7 +49,7 @@ test_expect_success APFS_CLONE 'dirty donor bytes are rejected' '
 	echo wrong-donor >file-2 &&
 	echo wrong-target >target/file-2 &&
 	GIT_APFS_TRACE=1 git -C target restore -- file-2 2>trace &&
-	grep "cloned=0 " trace &&
+	test_grep "cloned=0 " trace &&
 	test_cmp expected target/file-2 &&
 	git restore -- file-2
 '
@@ -71,8 +71,8 @@ test_expect_success APFS_CLONE 'large restore uses bounded native clone batches'
 		echo dirty >target/file-$i || return 1
 	done &&
 	GIT_APFS_TRACE=1 git -C target restore -- "file-*" 2>trace &&
-	grep "cloned=150 " trace &&
-	grep "git-apfs-batch:" trace &&
+	test_grep "cloned=150 " trace &&
+	test_grep "git-apfs-batch:" trace &&
 	git -C target diff --exit-code -- "file-*"
 '
 
@@ -84,8 +84,8 @@ test_expect_success APFS_CLONE 'batch rejects dirty donors without changing them
 	done &&
 	git diff --binary -- "file-*" >donor-before &&
 	GIT_APFS_TRACE=1 git -C target restore -- "file-*" 2>trace &&
-	grep "cloned=0 " trace &&
-	grep "git-apfs-batch:" trace &&
+	test_grep "cloned=0 " trace &&
+	test_grep "git-apfs-batch:" trace &&
 	git -C target diff --exit-code -- "file-*" &&
 	git diff --binary -- "file-*" >donor-after &&
 	test_cmp donor-before donor-after &&
@@ -98,7 +98,7 @@ test_expect_success APFS_CLONE 'explicit serial setting overrides automatic batc
 		echo dirty >target/file-$i || return 1
 	done &&
 	GIT_APFS_TRACE=1 git -C target -c checkout.workers=1 restore -- "file-*" 2>trace &&
-	grep "cloned=150 " trace &&
+	test_grep "cloned=150 " trace &&
 	test_grep ! "git-apfs-batch:" trace &&
 	git -C target diff --exit-code -- "file-*"
 '

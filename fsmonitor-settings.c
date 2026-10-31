@@ -109,6 +109,22 @@ static void lookup_fsmonitor_settings(struct repository *r)
 	if (r->settings.fsmonitor)
 		return;
 
+#ifdef __APPLE__
+	/* Concurrent APFS clone checkouts exposed missed edits with FSEvents.
+	 * Prefer ordinary stat validation until that interaction is resolved. */
+	{
+		unsigned long cache_limit = 0;
+		int clone_enabled = 1;
+		repo_config_get_bool(r, "apfs.clonecheckout", &clone_enabled);
+		clone_enabled = git_env_bool("GIT_APFS_CLONE_CHECKOUT", clone_enabled);
+		repo_config_get_ulong(r, "apfs.cachelimit", &cache_limit);
+		if (clone_enabled || cache_limit) {
+			fsm_settings__set_disabled(r);
+			return;
+		}
+	}
+#endif
+
 	/*
 	 * Overload the existing "core.fsmonitor" config setting (which
 	 * has historically been either unset or a hook pathname) to
